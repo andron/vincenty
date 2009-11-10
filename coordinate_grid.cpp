@@ -1,29 +1,22 @@
-// -*- mode:c++; tab-width:3; indent-tabs-mode:nil; c-basic-offset:3; -*-
+// -*- mode:c++; tab-width:2; indent-tabs-mode:nil; c-basic-offset:2; -*-
 
 /*
-  Copyright (C) 2009 by Anders Ronnbrant - andro@lysator.liu.se
+  Copyright (C) 2009, Anders Ronnbrant - andro@lysator.liu.se
   
   This file is part of libvincenty
 
-  libvincenty is free software: you can redistribute it and/or modify it
-  under the terms of the GNU Lesser General Public License as published by
-  the Free Software Foundation, either version 3 of the License, or (at your
-  option) any later version.
+  libvincenty is free software: you can redistribute it and/or modify it under
+  the terms of the GNU Lesser General Public License as published by the Free
+  Software Foundation, either version 3 of the License, or (at your option)
+  any later version.
 
   You should have received a copy of the GNU Lesser General Public License
   along with libvincenty.  If not, see <http://www.gnu.org/licenses/>.
-
-  Contributors:
-  # Anders Ronnbrant - Initial implementation.
 */
 
-#ifndef __coordinate_grid_h__
 #include "coordinate_grid.h"
-#endif
 
-#ifndef __vincenty_h__
 #include "vincenty.h"
-#endif
 
 using namespace vincenty;
 
@@ -46,11 +39,11 @@ interpolate2d( const double A,
                const double dx,
                const double dy )
 {
-   return 
-         A * ( 1 - dx ) * ( 1 - dy ) +
-         B * (     dx ) * ( 1 - dy ) +
-         C * ( 1 - dx ) * (     dy ) +
-         D * (     dx ) * (     dy );
+  return 
+      A * ( 1 - dx ) * ( 1 - dy ) +
+      B * (     dx ) * ( 1 - dy ) +
+      C * ( 1 - dx ) * (     dy ) +
+      D * (     dx ) * (     dy );
 }
 
 /*! 
@@ -67,91 +60,92 @@ interpolate_position( const vposition& A,
                       const double dy,
                       vposition& dest )
 {
-   /** 
-    * If we have a GCC-compiler version 4 or later and optimization is
-    * turned on two vector operands are used to speed things up. (It is not
-    * proven that this is faster then the simpler for-loop used in any other
-    * case. But doing it this way is much cooler, and should be faster).
-    */
+  /** 
+   * If we have a GCC-compiler version 4 or later and optimization is turned
+   * on two vector operands are used to speed things up. (It is not proven
+   * that this is faster then the simpler for-loop used in any other case. But
+   * doing it this way is much cooler, and should be faster).
+   */
 #if __GNUC__ > 3 && __OPTIMIZE__
-   // Initialize two vector operands
-   v2df_u vdx, _vdx;
-   vdx.a[0] = dx;
-   vdx.a[1] = dx;
-   _vdx.a[0] = 1-dx;
-   _vdx.a[1] = 1-dx;
+  // Initialize two vector operands
+  v2df_u vdx, _vdx;
+  vdx.a[0] = dx;
+  vdx.a[1] = dx;
+  _vdx.a[0] = 1-dx;
+  _vdx.a[1] = 1-dx;
 
-   v2df_u vdy, _vdy;
-   vdy.a[0] = dy;
-   vdy.a[1] = dy;
-   _vdy.a[0] = 1-dy;
-   _vdy.a[1] = 1-dy;
+  v2df_u vdy, _vdy;
+  vdy.a[0] = dy;
+  vdy.a[1] = dy;
+  _vdy.a[0] = 1-dy;
+  _vdy.a[1] = 1-dy;
 
-   // Compute both values at the same time using MMX or SSE instructions or
-   // whatever the compiler can do on the current arch.
-   dest.coords.v =
-         A.coords.v * ( _vdx.v ) * ( _vdy.v ) +
-         B.coords.v * (  vdx.v ) * ( _vdy.v ) +
-         C.coords.v * ( _vdx.v ) * (  vdy.v ) +
-         D.coords.v * (  vdx.v ) * (  vdy.v );
+  // Compute both values at the same time using MMX or SSE instructions or
+  // whatever the compiler can do on the current arch.
+  dest.coords.v =
+      A.coords.v * ( _vdx.v ) * ( _vdy.v ) +
+      B.coords.v * (  vdx.v ) * ( _vdy.v ) +
+      C.coords.v * ( _vdx.v ) * (  vdy.v ) +
+      D.coords.v * (  vdx.v ) * (  vdy.v );
 #else
-   for ( int i=0; i<2; ++i ) {
-      dest.coords.a[i] =
-            A.coords.a[i] * ( 1 - dx ) * ( 1 - dy ) +
-            B.coords.a[i] * (     dx ) * ( 1 - dy ) +
-            C.coords.a[i] * ( 1 - dx ) * (     dy ) +
-            D.coords.a[i] * (     dx ) * (     dy );
-   }
+  for ( int i=0; i<2; ++i ) {
+    dest.coords.a[i] =
+        A.coords.a[i] * ( 1 - dx ) * ( 1 - dy ) +
+        B.coords.a[i] * (     dx ) * ( 1 - dy ) +
+        C.coords.a[i] * ( 1 - dx ) * (     dy ) +
+        D.coords.a[i] * (     dx ) * (     dy );
+  }
 #endif
 }
 /**@}*/
 
+
 #define DEFAULT_INIT                            \
-   _grid(),                                     \
-      _center(vposition()),                     \
-      _radius(0),                               \
-      _virtual_grid_size(0),                    \
-      _grid_distance(0)
+  _grid(),                                      \
+    _center(vposition()),                       \
+    _radius(0),                                 \
+    _virtual_grid_size(0),                      \
+    _grid_distance(0)
 
 CoordinateGrid::CoordinateGrid()
-      : DEFAULT_INIT
+    : DEFAULT_INIT
 {
 }
 
 
 CoordinateGrid::CoordinateGrid( const coord_vector& init_coord_vector )
-      : DEFAULT_INIT
+    : DEFAULT_INIT
 {
-   _grid.push_back( init_coord_vector );
+  _grid.push_back( init_coord_vector );
 }
 
 CoordinateGrid::CoordinateGrid( const coord_grid& init_coord_grid )
-      : DEFAULT_INIT
+    : DEFAULT_INIT
 {
-   _grid = init_coord_grid;
+  _grid = init_coord_grid;
 }
 
 
 CoordinateGrid::CoordinateGrid( const vincenty::vposition& southwest_position,
                                 const vincenty::vposition& northeast_position )
-      : DEFAULT_INIT
+    : DEFAULT_INIT
 {
-   const unsigned short init_size = 3;
-   _grid = coord_grid( init_size, coord_vector(init_size, vposition(0,0)) );
+  const unsigned short init_size = 3;
+  _grid = coord_grid( init_size, coord_vector(init_size, vposition(0,0)) );
 
-   // Set the two corners.
-   _grid[2][0] = southwest_position;
-   _grid[0][2] = northeast_position;
+  // Set the two corners.
+  _grid[2][0] = southwest_position;
+  _grid[0][2] = northeast_position;
 
-   // Compute middle point and use as center.
-   const vdirection a = inverse(_grid[0][2],_grid[2][0]);
-   _grid[1][1] = direct(_grid[0][2],a.bearing1,a.distance/2);
+  // Compute middle point and use as center.
+  const vdirection a = inverse(_grid[0][2],_grid[2][0]);
+  _grid[1][1] = direct(_grid[0][2],a.bearing1,a.distance/2);
 
-   // Set grid distance.
-   _grid_distance = a.distance / sqrt(2);
+  // Set grid distance.
+  _grid_distance = a.distance / sqrt(2);
 
-   // Initialize "again" from the new center.
-   _initialize_from_center();
+  // Initialize "again" from the new center.
+  _initialize_from_center();
 }
 
 
@@ -159,68 +153,68 @@ CoordinateGrid::CoordinateGrid( const vincenty::vposition& southwest_position,
                                 const vincenty::vposition& northwest_position,
                                 const vincenty::vposition& northeast_position,
                                 const vincenty::vposition& southeast_position )
-      : DEFAULT_INIT
+    : DEFAULT_INIT
 {
-   const unsigned short init_size = 3;
-   _grid = coord_grid( init_size, coord_vector(init_size, vposition(0,0)) );
+  const unsigned short init_size = 3;
+  _grid = coord_grid( init_size, coord_vector(init_size, vposition(0,0)) );
 
-   // The four corners.
-   _grid[2][0] = southwest_position;
-   _grid[0][0] = northwest_position;
-   _grid[0][2] = northeast_position;
-   _grid[2][2] = southeast_position;
+  // The four corners.
+  _grid[2][0] = southwest_position;
+  _grid[0][0] = northwest_position;
+  _grid[0][2] = northeast_position;
+  _grid[2][2] = southeast_position;
 
-   _initialize_from_corners();
+  _initialize_from_corners();
 }
 
 
 CoordinateGrid::CoordinateGrid( const vposition& center,
                                 const double radius,
                                 const unsigned int virtual_grid_size )
-      : _grid(),
-        _center(center),
-        _radius(radius),
-        _virtual_grid_size(virtual_grid_size),
-        _grid_distance(radius)
+    : _grid(),
+      _center(center),
+      _radius(radius),
+      _virtual_grid_size(virtual_grid_size),
+      _grid_distance(radius)
 {
-   _initialize_from_center();
+  _initialize_from_center();
 }
 
 
 CoordinateGrid::CoordinateGrid( const CoordinateGrid& vg )
-      : _grid(vg._grid),
-        _center(vg._center),
-        _radius(vg._radius),
-        _virtual_grid_size(vg._virtual_grid_size),
-        _grid_distance(vg._grid_distance)
+    : _grid(vg._grid),
+      _center(vg._center),
+      _radius(vg._radius),
+      _virtual_grid_size(vg._virtual_grid_size),
+      _grid_distance(vg._grid_distance)
 {
-   _initialize_from_center();
+  _initialize_from_center();
 }
 
 
 CoordinateGrid::~CoordinateGrid()
 {
-   // Delete the coord_grid vector-vector here if neccessary.
+  // Delete the coord_grid vector-vector here if neccessary.
 }
 
 
 std::ostream&
 operator<<( std::ostream& os, CoordinateGrid& rhs )
 {
-   /**
-    * @todo Consider using a coord_vector ostream operator for
-    * this. I.e. implement a coord_vector ostream operator and then use it
-    * here. It would be nice to be able to print a coord_vector as well.
-    */
-   coord_grid::const_iterator it1 = rhs._grid.begin();
-   for ( ; it1 != rhs._grid.end() ; ++it1 ) {
-      coord_vector::const_iterator it2 = (*it1).begin();
-      for ( ; it2 != (*it1).end() ; ++it2 ) {
-         os << (*it2);
-      }
-      os << std::endl;
-   }
-   return os;
+  /**
+   * @todo Consider using a coord_vector ostream operator for
+   * this. I.e. implement a coord_vector ostream operator and then use it
+   * here. It would be nice to be able to print a coord_vector as well.
+   */
+  coord_grid::const_iterator it1 = rhs._grid.begin();
+  for ( ; it1 != rhs._grid.end() ; ++it1 ) {
+    coord_vector::const_iterator it2 = (*it1).begin();
+    for ( ; it2 != (*it1).end() ; ++it2 ) {
+      os << (*it2);
+    }
+    os << std::endl;
+  }
+  return os;
 }
 
 
@@ -235,139 +229,139 @@ operator<<( std::ostream& os, CoordinateGrid& rhs )
 void
 CoordinateGrid::_initialize_from_center()
 {
-   const unsigned short init_size = 3;
-   _grid = coord_grid( init_size, coord_vector(init_size, vposition(0,0)) );
+  const unsigned short init_size = 3;
+  _grid = coord_grid( init_size, coord_vector(init_size, vposition(0,0)) );
 
-   _grid[1][1] = _center;
+  _grid[1][1] = _center;
 
-   _grid[0][1] = direct( _center, direction::north, _grid_distance );
-   _grid[1][2] = direct( _center, direction::east , _grid_distance );
-   _grid[2][1] = direct( _center, direction::south, _grid_distance );
-   _grid[1][0] = direct( _center, direction::west , _grid_distance );
+  _grid[0][1] = direct( _center, direction::north, _grid_distance );
+  _grid[1][2] = direct( _center, direction::east , _grid_distance );
+  _grid[2][1] = direct( _center, direction::south, _grid_distance );
+  _grid[1][0] = direct( _center, direction::west , _grid_distance );
 
-   _grid[0][2] = direct( _center, direction::northeast, sqrt(2)*_grid_distance );
-   _grid[2][2] = direct( _center, direction::southeast, sqrt(2)*_grid_distance );
-   _grid[2][0] = direct( _center, direction::southwest, sqrt(2)*_grid_distance );
-   _grid[0][0] = direct( _center, direction::northwest, sqrt(2)*_grid_distance );
+  _grid[0][2] = direct( _center, direction::northeast, sqrt(2)*_grid_distance );
+  _grid[2][2] = direct( _center, direction::southeast, sqrt(2)*_grid_distance );
+  _grid[2][0] = direct( _center, direction::southwest, sqrt(2)*_grid_distance );
+  _grid[0][0] = direct( _center, direction::northwest, sqrt(2)*_grid_distance );
 }
 
 
 void
 CoordinateGrid::_initialize_from_corners()
 {
-   // All edges.
-   vdirection a;
-   a = inverse(_grid[0][0],_grid[0][2]);
-   _grid[0][1] = direct(_grid[0][0],a.bearing1,a.distance/2);
+  // All edges.
+  vdirection a;
+  a = inverse(_grid[0][0],_grid[0][2]);
+  _grid[0][1] = direct(_grid[0][0],a.bearing1,a.distance/2);
    
-   a = inverse(_grid[0][0],_grid[2][0]);
-   _grid[1][0] = direct(_grid[0][0],a.bearing1,a.distance/2);
+  a = inverse(_grid[0][0],_grid[2][0]);
+  _grid[1][0] = direct(_grid[0][0],a.bearing1,a.distance/2);
    
-   a = inverse(_grid[0][2],_grid[2][2]);
-   _grid[1][2] = direct(_grid[0][2],a.bearing1,a.distance/2);
+  a = inverse(_grid[0][2],_grid[2][2]);
+  _grid[1][2] = direct(_grid[0][2],a.bearing1,a.distance/2);
 
-   a = inverse(_grid[2][0],_grid[2][2]);
-   _grid[2][1] = direct(_grid[2][0],a.bearing1,a.distance/2);
+  a = inverse(_grid[2][0],_grid[2][2]);
+  _grid[2][1] = direct(_grid[2][0],a.bearing1,a.distance/2);
 
-   // And the center.
-   a = inverse(_grid[0][1],_grid[2][1]);
-   _grid[1][1] = direct(_grid[0][1],a.bearing1,a.distance/2);
+  // And the center.
+  a = inverse(_grid[0][1],_grid[2][1]);
+  _grid[1][1] = direct(_grid[0][1],a.bearing1,a.distance/2);
 }
 
 
 CoordinateGrid&
 CoordinateGrid::setVirtualGridSize( const unsigned int virtual_grid_size )
 {
-   _virtual_grid_size = virtual_grid_size;
-   return (*this);
+  _virtual_grid_size = virtual_grid_size;
+  return (*this);
 }
 
 unsigned int
 CoordinateGrid::getVirtualGridSize() const
 {
-   return _virtual_grid_size;
+  return _virtual_grid_size;
 }
 
 unsigned int
 CoordinateGrid::getRealGridSize() const
 {
-   return _grid.size();
+  return _grid.size();
 }
 
 double
 CoordinateGrid::getGridDistance() const
 {
-   return _grid_distance;
+  return _grid_distance;
 }
 
 double
 CoordinateGrid::getGridRadius() const
 {
-   return _radius;
+  return _radius;
 }
 
 
 coord_vector
 CoordinateGrid::copyRow( unsigned int idx ) const
 {
-   if ( _grid.empty() ) {
-      return coord_vector();
-   }
+  if ( _grid.empty() ) {
+    return coord_vector();
+  }
    
-   if ( _grid.size() < idx ) {
-      /**
-       * If the user over addresses, the last row is returned because that was
-       * probably what the user wanted. (To get a f-ing row somewhere at the
-       * end!).
-       */
-      return _grid[_grid.size()-1];
-   } else {
-      return _grid[idx];
-   }
+  if ( _grid.size() < idx ) {
+    /**
+     * If the user over addresses, the last row is returned because that was
+     * probably what the user wanted. (To get a f-ing row somewhere at the
+     * end!).
+     */
+    return _grid[_grid.size()-1];
+  } else {
+    return _grid[idx];
+  }
 }
 
 coord_vector
 CoordinateGrid::copyCol( unsigned int idx ) const
 {
-   coord_vector cvec;
-   if ( _grid.size() > 0 ) {
-      if ( _grid[0].size() < idx ) {
-         idx = _grid[0].size() - 1;
-      }
-      coord_grid::const_iterator it = _grid.begin();
-      for ( ; it != _grid.end(); ++it ) {
-         cvec.push_back( (*it)[idx] );
-      }
-   }
-   return cvec;
+  coord_vector cvec;
+  if ( _grid.size() > 0 ) {
+    if ( _grid[0].size() < idx ) {
+      idx = _grid[0].size() - 1;
+    }
+    coord_grid::const_iterator it = _grid.begin();
+    for ( ; it != _grid.end(); ++it ) {
+      cvec.push_back( (*it)[idx] );
+    }
+  }
+  return cvec;
 }
 
 
 CoordinateGrid&
 CoordinateGrid::split()
 {
-   _split();
-   return (*this);
+  _split();
+  return (*this);
 }
 
 
 CoordinateGrid&
 CoordinateGrid::split( const unsigned int number_of_splits )
 {
-   for ( unsigned int i=0; i<number_of_splits; ++i ) {
-      _split();
-   }
-   return (*this);
+  for ( unsigned int i=0; i<number_of_splits; ++i ) {
+    _split();
+  }
+  return (*this);
 }
 
 
 CoordinateGrid&
 CoordinateGrid::splitUntil( const unsigned int maximum_grid_point_distance )
 {
-   while ( _grid_distance > maximum_grid_point_distance ) {
-      _split();
-   }
-   return (*this);
+  while ( _grid_distance > maximum_grid_point_distance ) {
+    _split();
+  }
+  return (*this);
 }
 
 
@@ -377,14 +371,14 @@ CoordinateGrid::splitUntil( const unsigned int maximum_grid_point_distance )
 void
 CoordinateGrid::_padcopy( coord_grid& dst, const coord_grid& src )
 {
-   // Assume the sizes are of the sort 2^n+1, as should when the grids are
-   // created, then this formula should give an even number.
-   const unsigned int A = (dst.size()-1) / (src.size()-1);
-   for ( size_t m=0; m<src.size(); ++m ) { 
-      for ( size_t n=0; n<src.size(); ++n ) { 
-         dst[m*A][n*A] = src[m][n];
-      }
-   }
+  // Assume the sizes are of the sort 2^n+1, as should when the grids are
+  // created, then this formula should give an even number.
+  const unsigned int A = (dst.size()-1) / (src.size()-1);
+  for ( size_t m=0; m<src.size(); ++m ) { 
+    for ( size_t n=0; n<src.size(); ++n ) { 
+      dst[m*A][n*A] = src[m][n];
+    }
+  }
 }
 
 
@@ -398,153 +392,153 @@ CoordinateGrid::_padcopy( coord_grid& dst, const coord_grid& src )
 void
 CoordinateGrid::_split()
 {
-   /**
-    * @todo Consider implementing another _split which can split to arbitrary
-    * sizes on one single allocation. And processes "even" and "odd" lines at
-    * the same time. (New odd lines are those in between two older ones).  Such
-    * a loop, which does not visit the same position twice, will become a
-    * little complex to read though. The small, not certain, speed gain might
-    * not be worth such an effort.
-    */
+  /**
+   * @todo Consider implementing another _split which can split to arbitrary
+   * sizes on one single allocation. And processes "even" and "odd" lines at
+   * the same time. (New odd lines are those in between two older ones).  Such
+   * a loop, which does not visit the same position twice, will become a
+   * little complex to read though. The small, not certain, speed gain might
+   * not be worth such an effort.
+   */
 
-   // The new size is always twice the old one minus 1 to keep the size odd.
-   // (Sizes: 2^(n+1)+1, or (x-1)*2^m+1).
-   const unsigned int new_grid_size = (_grid.size() - 1) * 2 + 1;
+  // The new size is always twice the old one minus 1 to keep the size odd.
+  // (Sizes: 2^(n+1)+1, or (x-1)*2^m+1).
+  const unsigned int new_grid_size = (_grid.size() - 1) * 2 + 1;
 
-   // The new grid is initalized with the new size and an empty coord_vector
-   // (only containing positions at 0,0).
-   coord_grid grid( new_grid_size, coord_vector( new_grid_size ) );
+  // The new grid is initalized with the new size and an empty coord_vector
+  // (only containing positions at 0,0).
+  coord_grid grid( new_grid_size, coord_vector( new_grid_size ) );
 
-   // Variables i and j loops columns and rows repectively over the new
-   // raster, which is supposed to be filled with new data.  Indexes m and n
-   // handles the column index while u and v are used for row indexing. Index
-   // m is the "smaller" of m and n, and u is the smaller of u and v.
-   for ( unsigned int i=0; i<new_grid_size; ++i ) {
-      const unsigned int m = i/2;
-      const unsigned int n = (i+1)/2;
-      for ( unsigned int j=0; j<new_grid_size; ++j ) {
-         const unsigned int u = j/2;
-         const unsigned int v = (j+1)/2;
-         if ( i%2 == 0 ) {
-            if ( j%2 == 0 ) {
-               // When both i and j are even we are located on an "old" point,
-               // or a point corresponding to a point in the old grid. Just
-               // copy the point.  grid[i][j] = grid[m][u];
-               grid[i][j] = _grid[m][u];
-            } else {
-               // If only i is even, use the m index to get the column in the
-               // old grid (both m and n will have the same value in this
-               // case) and then u and v to get the row. Index u and v will
-               // have different values here which is why we must find a point
-               // between them.
+  // Variables i and j loops columns and rows repectively over the new
+  // raster, which is supposed to be filled with new data.  Indexes m and n
+  // handles the column index while u and v are used for row indexing. Index
+  // m is the "smaller" of m and n, and u is the smaller of u and v.
+  for ( unsigned int i=0; i<new_grid_size; ++i ) {
+    const unsigned int m = i/2;
+    const unsigned int n = (i+1)/2;
+    for ( unsigned int j=0; j<new_grid_size; ++j ) {
+      const unsigned int u = j/2;
+      const unsigned int v = (j+1)/2;
+      if ( i%2 == 0 ) {
+        if ( j%2 == 0 ) {
+          // When both i and j are even we are located on an "old" point,
+          // or a point corresponding to a point in the old grid. Just
+          // copy the point.  grid[i][j] = grid[m][u];
+          grid[i][j] = _grid[m][u];
+        } else {
+          // If only i is even, use the m index to get the column in the
+          // old grid (both m and n will have the same value in this
+          // case) and then u and v to get the row. Index u and v will
+          // have different values here which is why we must find a point
+          // between them.
                
-               // Create a vdirection between two old points and then use the
-               // bearing from that calculation to find the point exactly
-               // between the two points. The distance between grid points for
-               // the new grid is the old size / 2.
-               const vdirection a = inverse(_grid[m][u],_grid[m][v]);
-               grid[i][j] = direct(_grid[m][u],a.bearing1,a.distance/2);
-            }
-         } else {
-            if ( j%2 == 0 ) {
-               // Same case as with even i-index.
-               const vdirection a = inverse(_grid[m][u],_grid[n][u]);
-               grid[i][j] = direct(_grid[m][u],a.bearing1,a.distance/2);
-            } else {
-               // When both index i and j are odd we have point which is not
-               // on an old edge but rather in the middle of the old
-               // square. Create a diagonal line and find the middle
-               // point. The distance is now square root of 2 times the old
-               // grid distance.
-               const vdirection a = inverse(_grid[m][u],_grid[n][v]);
-               grid[i][j] = direct(_grid[m][u],a.bearing1,sqrt(2)*a.distance);
-            }
-         }
+          // Create a vdirection between two old points and then use the
+          // bearing from that calculation to find the point exactly
+          // between the two points. The distance between grid points for
+          // the new grid is the old size / 2.
+          const vdirection a = inverse(_grid[m][u],_grid[m][v]);
+          grid[i][j] = direct(_grid[m][u],a.bearing1,a.distance/2);
+        }
+      } else {
+        if ( j%2 == 0 ) {
+          // Same case as with even i-index.
+          const vdirection a = inverse(_grid[m][u],_grid[n][u]);
+          grid[i][j] = direct(_grid[m][u],a.bearing1,a.distance/2);
+        } else {
+          // When both index i and j are odd we have point which is not
+          // on an old edge but rather in the middle of the old
+          // square. Create a diagonal line and find the middle
+          // point. The distance is now square root of 2 times the old
+          // grid distance.
+          const vdirection a = inverse(_grid[m][u],_grid[n][v]);
+          grid[i][j] = direct(_grid[m][u],a.bearing1,sqrt(2)*a.distance);
+        }
       }
-   }
-   // Just assume the grid distance has halfed.
-   _grid_distance /= 2;
-   _grid.swap( grid );
+    }
+  }
+  // Just assume the grid distance has halfed.
+  _grid_distance /= 2;
+  _grid.swap( grid );
 }
 
 
 CoordinateGrid&
 CoordinateGrid::join()
 {
-   _join();
-   return (*this);
+  _join();
+  return (*this);
 }
 
 CoordinateGrid&
 CoordinateGrid::join( const unsigned int number_of_joins )
 {
-   for ( unsigned int i=0; i<number_of_joins; ++i ) {
-      _join();
-   }
-   return (*this);
+  for ( unsigned int i=0; i<number_of_joins; ++i ) {
+    _join();
+  }
+  return (*this);
 }
 
 CoordinateGrid&
 CoordinateGrid::joinUtil( const unsigned int minimum_grid_point_distance )
 {
-   while ( _grid_distance < minimum_grid_point_distance ) {
-      _join();
-   }
-   return (*this);
+  while ( _grid_distance < minimum_grid_point_distance ) {
+    _join();
+  }
+  return (*this);
 }
 
 
 void
 CoordinateGrid::_join()
 {
-   const unsigned int new_grid_size = (_grid.size()-1)/2+1;
-   coord_grid grid( new_grid_size, coord_vector(new_grid_size, vposition(0,0)) );
+  const unsigned int new_grid_size = (_grid.size()-1)/2+1;
+  coord_grid grid( new_grid_size, coord_vector(new_grid_size, vposition(0,0)) );
 
-   for ( unsigned int i=0; i<new_grid_size; ++i ) {
-      for ( unsigned int j=0; j<new_grid_size; ++j ) {
-         grid[i][j] = _grid[i*2][j*2];
-      }
-   }
+  for ( unsigned int i=0; i<new_grid_size; ++i ) {
+    for ( unsigned int j=0; j<new_grid_size; ++j ) {
+      grid[i][j] = _grid[i*2][j*2];
+    }
+  }
    
-   _grid_distance *= 2;
-   _grid.swap( grid );
+  _grid_distance *= 2;
+  _grid.swap( grid );
 }
 
 
 vposition
 CoordinateGrid::operator()( unsigned int i, unsigned int j ) const
 {
-   // Assume we always operate on square sized grids
-   const unsigned int N = _grid.size() - 1;
-   const unsigned int n = _virtual_grid_size;
+  // Assume we always operate on square sized grids
+  const unsigned int N = _grid.size() - 1;
+  const unsigned int n = _virtual_grid_size;
 
-   // A simple check to prevent annoying segfaults when the user addresses
-   // indexes outside the grid.
-   if ( i > n )
-      i = n;
-   if ( j > n )
-      j = n;
+  // A simple check to prevent annoying segfaults when the user addresses
+  // indexes outside the grid.
+  if ( i > n )
+    i = n;
+  if ( j > n )
+    j = n;
    
-   // Compute the offset in fractions from the closest corner grid position.
-   // {i,j}_0 is the {upper,left} most grid position. {i,j}_1 is just the
-   // next one. d{i,j} is the fractial offset from the real grid position to
-   // the virtual grid position.
-   const unsigned int i_0 = ( 1 + i * N ) / n;
-   const unsigned int i_1 = i_0 + 1;
-   const double di = double(N)/n * (0.5+i) - int(double(i*N)/n);
+  // Compute the offset in fractions from the closest corner grid position.
+  // {i,j}_0 is the {upper,left} most grid position. {i,j}_1 is just the
+  // next one. d{i,j} is the fractial offset from the real grid position to
+  // the virtual grid position.
+  const unsigned int i_0 = ( 1 + i * N ) / n;
+  const unsigned int i_1 = i_0 + 1;
+  const double di = double(N)/n * (0.5+i) - int(double(i*N)/n);
 
-   const unsigned int j_0 = ( 1 + j * N ) / n;
-   const unsigned int j_1 = j_0 + 1;
-   const double dj = double(N)/n * (0.5+j) - int(double(j*N)/n);
+  const unsigned int j_0 = ( 1 + j * N ) / n;
+  const unsigned int j_1 = j_0 + 1;
+  const double dj = double(N)/n * (0.5+j) - int(double(j*N)/n);
 
-   const vposition A = _grid[i_0][j_0];
-   const vposition B = _grid[i_0][j_1];
-   const vposition C = _grid[i_1][j_0];
-   const vposition D = _grid[i_1][j_1];
+  const vposition A = _grid[i_0][j_0];
+  const vposition B = _grid[i_0][j_1];
+  const vposition C = _grid[i_1][j_0];
+  const vposition D = _grid[i_1][j_1];
    
-   // Interpolate between the four corners A,B,C and D at position
-   // dj,di. The result is stored in pos.
-   vposition pos;
-   interpolate_position( A, B, C, D, dj, di, pos );
-   return pos;
+  // Interpolate between the four corners A,B,C and D at position
+  // dj,di. The result is stored in pos.
+  vposition pos;
+  interpolate_position( A, B, C, D, dj, di, pos );
+  return pos;
 }

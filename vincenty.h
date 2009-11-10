@@ -1,20 +1,17 @@
 // -*- mode:c++; tab-width:2; indent-tabs-mode:nil; c-basic-offset:2; -*-
 
 /*
-  Copyright (C) 2009 by Anders Ronnbrant - andro@lysator.liu.se
+  Copyright (C) 2009, Anders Ronnbrant - andro@lysator.liu.se
   
   This file is part of libvincenty
 
-  libvincenty is free software: you can redistribute it and/or modify it
-  under the terms of the GNU Lesser General Public License as published by
-  the Free Software Foundation, either version 3 of the License, or (at your
-  option) any later version.
+  libvincenty is free software: you can redistribute it and/or modify it under
+  the terms of the GNU Lesser General Public License as published by the Free
+  Software Foundation, either version 3 of the License, or (at your option)
+  any later version.
 
   You should have received a copy of the GNU Lesser General Public License
   along with libvincenty.  If not, see <http://www.gnu.org/licenses/>.
-
-  Contributors:
-  Anders Ronnbrant - Initial implementation.
 */
 
 #ifndef __vincenty_h__
@@ -25,6 +22,9 @@
 #include <iostream>
 #include <map>
 #include <vector>
+
+//! Defines uint64_t, and more. <cstdint> in next standard.
+#include <stdint.h>
 
 typedef double v2df __attribute__((vector_size(16)));
 typedef float  v4sf __attribute__((vector_size(16)));
@@ -49,7 +49,7 @@ namespace vincenty {
  * The union construction is necessary to for initializing a vector from any of
  * the corresponding base types.
  */
-/**@{*/
+//!@{
 union v2df_u {
   v2df v;
   double a[2];
@@ -59,7 +59,7 @@ union v4sf_u {
   v4sf v;
   float a[4];
 };
-/**@}*/
+//!@}
 
 
 /*!
@@ -385,7 +385,7 @@ double get_bearing(
     const double lat2,
     const double lon2 ) __attribute__ ((pure));
 
-/**@}*/
+//!@}
 
 /*!
  * @brief Convert to radians.

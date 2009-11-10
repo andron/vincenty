@@ -1,28 +1,23 @@
-// -*- mode:c++; tab-width:3; indent-tabs-mode:nil; c-basic-offset:3; -*-
+// -*- mode:c++; tab-width:2; indent-tabs-mode:nil; c-basic-offset:2; -*-
 
 /*
-  Copyright (C) 2009 by Anders Ronnbrant - andro@lysator.liu.se
+  Copyright (C) 2009, Anders Ronnbrant - andro@lysator.liu.se
   
   This file is part of libvincenty
 
-  libvincenty is free software: you can redistribute it and/or modify it
-  under the terms of the GNU Lesser General Public License as published by
-  the Free Software Foundation, either version 3 of the License, or (at your
-  option) any later version.
+  libvincenty is free software: you can redistribute it and/or modify it under
+  the terms of the GNU Lesser General Public License as published by the Free
+  Software Foundation, either version 3 of the License, or (at your option)
+  any later version.
 
   You should have received a copy of the GNU Lesser General Public License
   along with libvincenty.  If not, see <http://www.gnu.org/licenses/>.
-
-  Contributors:
-  # Anders Ronnbrant - Initial implementation.
 */
 
 #ifndef __coordinate_grid_h__
 #define __coordinate_grid_h__
 
-#ifndef __vincenty_h__
 #include "vincenty.h"
-#endif
 
 #include <vector>
 #include <iostream>

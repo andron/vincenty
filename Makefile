@@ -33,9 +33,9 @@ endif
 
 LIBVERSION := 1.0.0
 libvincenty.so: LDFLAGS := -Wl,-no-undefined
-libvincenty.so: MAJORVERSION := $(firstword $(subst ., ,$(LIBVERSION)))
+libvincenty.so: INTERFACEVERSION := $(firstword $(subst ., ,$(LIBVERSION)))
 libvincenty.so: vincenty.o vincenty_geotypes.o vincenty_ostream.o coordinate_grid.o
-	$(LINK.cpp) -shared -Wl,-soname=$@.$(MAJORVERSION) -o $@.$(LIBVERSION) $^
+	$(LINK.cpp) -shared -Wl,-soname=$@.$(INTERFACEVERSION) -o $@.$(LIBVERSION) $^
 	/sbin/ldconfig -n ./
 	/bin/ln -sf $@.$(firstword $(subst ., ,$(LIBVERSION))) $@
 
