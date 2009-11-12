@@ -2,16 +2,20 @@
 
 /*
   Copyright (C) 2009, Anders Ronnbrant - andro@lysator.liu.se
-  
-  This file is part of libvincenty
+  All rights reserved.
 
-  libvincenty is free software: you can redistribute it and/or modify it under
-  the terms of the GNU Lesser General Public License as published by the Free
-  Software Foundation, either version 3 of the License, or (at your option)
-  any later version.
+  Redistribution and use in source and binary forms, with or without
+  modification, are permitted provided that the following conditions are met:
 
-  You should have received a copy of the GNU Lesser General Public License
-  along with libvincenty.  If not, see <http://www.gnu.org/licenses/>.
+  * Redistributions of source code must retain the above copyright notice,
+    this list of conditions and the following disclaimer.
+
+  * Redistributions in binary form must reproduce the above copyright notice,
+    this list of conditions and the following disclaimer in the documentation
+    and/or other materials provided with the distribution.
+
+  You should have received a copy of the FreeBSD license, if not see:
+  <http://www.freebsd.org/copyright/freebsd-license.html>.
 */
 
 #include "coordinate_grid.h"

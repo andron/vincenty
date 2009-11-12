@@ -1,6 +1,6 @@
 // -*- mode:c++; tab-width:2; indent-tabs-mode:nil; c-basic-offset:2; -*-
 
-// THIS FILE IS ONLY FOR DOCUMENTATION PURPOSES.
+// THIS FILE IS FOR DOCUMENTATION PURPOSES ONLY.
 
 /*!
  * \mainpage
