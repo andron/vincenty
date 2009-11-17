@@ -64,9 +64,34 @@ std::ostream& format::dd(std::ostream& os)
   return os;
 }
 
-long format::type()
+
+std::ostream& format::deg(std::ostream& os)
+{
+  if ( _format.find("direction_format" ) == _format.end() ) {
+    _format["direction_format"] = os.xalloc();
+  }
+  os.iword(_format["direction_format"]) = DEG;
+  return os;
+}
+
+std::ostream& format::rad(std::ostream& os)
+{
+  if ( _format.find("direction_format" ) == _format.end() ) {
+    _format["direction_format"] = os.xalloc();
+  }
+  os.iword(_format["direction_format"]) = RAD;
+  return os;
+}
+
+
+long format::coordtype()
 {
   return _format["coordinate_format"];
+}
+
+long format::dirtype()
+{
+  return _format["direction_format"];
 }
 
 
@@ -89,10 +114,17 @@ std::ostream& operator<<( std::ostream& os, const vdirection& rhs )
   const std::streamsize prec = os.precision();
   os.setf( std::ios::fixed );
   os.fill(' ');
-  os << "{" 
-     << std::setw(prec+3) << rhs.bearing1 << "," 
-     << std::setw(prec+3) << rhs.distance << "," 
-     << std::setw(prec+3) << rhs.bearing2 << "}";
+  if ( os.iword(format::dirtype()) == format::DEG ) {
+    os << "{" 
+       << std::setw(prec+5) << rhs.bearing1*180/M_PI << "," 
+       << std::setw(prec)   << rhs.distance << "," 
+       << std::setw(prec+5) << rhs.bearing2*180/M_PI << "}";
+  } else {
+    os << "{" 
+       << std::setw(prec+3) << rhs.bearing1 << "," 
+       << std::setw(prec)   << rhs.distance << "," 
+       << std::setw(prec+3) << rhs.bearing2 << "}";
+  }
   os.setf( fmt );
   return os;
 }
@@ -118,7 +150,7 @@ std::ostream& operator<<( std::ostream& os, const vposition& rhs )
 {
   const std::ios_base::fmtflags fmt = os.flags();
   os.setf( std::ios::fixed );
-  if ( os.iword(format::type()) == format::DMS ) {
+  if ( os.iword(format::coordtype()) == format::DMS ) {
     os << "["
        << std::setw(2) << vposition::deg(rhs.coords.a[0]) << "°" 
        << std::setw(2) << vposition::min(rhs.coords.a[0]) << "'" 
@@ -128,7 +160,7 @@ std::ostream& operator<<( std::ostream& os, const vposition& rhs )
        << std::setw(2) << vposition::min(rhs.coords.a[1]) << "'" 
        << std::setw(std::cout.precision()+3)
        << vposition::secf(rhs.coords.a[1]) << "\"]";
-  } else if ( os.iword(format::type()) == format::DM ) {
+  } else if ( os.iword(format::coordtype()) == format::DM ) {
     os << "["
        << std::setw(2) << vposition::deg(rhs.coords.a[0]) << "°" 
        << std::setw(std::cout.precision()+3)
@@ -136,7 +168,7 @@ std::ostream& operator<<( std::ostream& os, const vposition& rhs )
        << std::setw(2) << vposition::deg(rhs.coords.a[1]) << "°" 
        << std::setw(std::cout.precision()+3)
        << vposition::minf(rhs.coords.a[1]) << "']";
-  } else if ( os.iword(format::type()) == format::DD ) {
+  } else if ( os.iword(format::coordtype()) == format::DD ) {
     os << "[" 
        << std::setw(std::cout.precision()+3)
        << vposition::degf(rhs.coords.a[0]) << ","

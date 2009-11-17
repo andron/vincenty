@@ -4,11 +4,25 @@
 
 .DEFAULT: all
 
+# Linking is default cpp-style not c.
+LINK.o = $(LINK.cpp)
+
+# Link and compile
+%.so:
+	$(LINK.cpp) -shared -Wl,-soname=$@.$(INTERFACEVERSION) -o $@.$(LIBVERSION) $^
+	/sbin/ldconfig -n ./
+	/bin/ln -sf $@.$(firstword $(subst ., ,$(LIBVERSION))) $@
+%.o:%.cpp
+	$(COMPILE.cpp) $< $(OUTPUT_OPTION)
+%:%.o
+	$(LINK.cpp) $^ $(OUTPUT_OPTION)
+
 all: libvincenty.so
 
 -include *.d
 
 CXXFLAGS := -pipe -fpic -g -MMD -W -Wall -Wextra -pedantic -Weffc++
+LDFLAGS := -Wl,--as-needed -Wl,--no-undefined -Wl,-rpath=./ -L./
 
 ifdef tune
 CXXFLAGS += -O3 -mtune=native
@@ -31,22 +45,31 @@ CXXFLAGS += \
 	-fprefetch-loop-arrays -funroll-loops -funswitch-loops)
 endif
 
-LIBVERSION := 1.0.0
-libvincenty.so: LDFLAGS := -Wl,-no-undefined
+libvincenty.so: LDFLAGS := -Wl,--no-undefined
+libvincenty.so: LIBVERSION := 1.0.0
 libvincenty.so: INTERFACEVERSION := $(firstword $(subst ., ,$(LIBVERSION)))
 libvincenty.so: vincenty.o vincenty_geotypes.o vincenty_ostream.o coordinate_grid.o
-	$(LINK.cpp) -shared -Wl,-soname=$@.$(INTERFACEVERSION) -o $@.$(LIBVERSION) $^
-	/sbin/ldconfig -n ./
-	/bin/ln -sf $@.$(firstword $(subst ., ,$(LIBVERSION))) $@
 
-test: libvincenty.so test.o
-test: LDFLAGS := -Wl,--as-needed -Wl,-rpath=./ -L./ -lvincenty -lgtest_main
+test: test_vincenty test_coordinate_grid test_angle_correction
+test_vincenty: test_vincenty.o libvincenty.so
+test_vincenty: LDFLAGS += -lgtest_main
+
+test_coordinate_grid: test_coordinate_grid.o libvincenty.so
+test_coordinate_grid: LDFLAGS += -lgtest_main
+
+test_angle_correction: test_angle_correction.o libvincenty.so
+test_angle_correction: LDFLAGS +=
+
+example: example_coordinate_grid
+example_coordinate_grid: LDFLAGS := -Wl,--as-needed -Wl,-rpath=./ -L./
+example_coordinate_grid: example_coordinate_grid.o libvincenty.so
 
 check: test
-	./test
+	./test_vincenty
+	./test_coordinate_grid
 
 distclean:
-	-rm -f test *.so* *.o *~ *.d
+	-rm -f test_vincenty test_coordinate_grid example_coordinate_grid *.so* *.o *~ *.d
 
 doc:
 	doxygen

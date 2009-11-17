@@ -114,8 +114,8 @@ class format
 
  public:
   //! Enum values representing the different formats stored in the format-map.
-  enum { DMS, DM, DD };
-   
+  enum { DMS, DM, DD, DEG, RAD };
+  
   //! Format coordinates in degrees, minutes and decimal seconds.
   static std::ostream& dms(std::ostream& os);
 
@@ -124,12 +124,24 @@ class format
       
   //! Format coordinates in decimal degrees.
   static std::ostream& dd(std::ostream& os);
+
+  //! Format direction in degrees.
+  static std::ostream& deg(std::ostream& os);
+
+  //! Format direction in radians.
+  static std::ostream& rad(std::ostream& os);
       
   /*!
-   * @brief Returns the current format value.
+   * @brief Returns the current coordinate format value.
    * @return ostream xalloc value.
    */
-  static long type();
+  static long coordtype();
+
+  /*!
+   * @brief Returns the current direction format value.
+   * @return ostream xalloc value.
+   */
+  static long dirtype();
 };
 
 

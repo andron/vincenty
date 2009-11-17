@@ -101,6 +101,41 @@ TEST_F(VincentyBasicTest, NonNegativeDistances) {
 }
 
 
+TEST_F(VincentyBasicTest, CompareOperatorsPosAreOk) {
+  srand48(123456789);
+  const unsigned int loops = 50;
+  for ( unsigned int i=0; i<loops; ++i ) {
+    const double lat = 2*M_PI * ( drand48() - 0.5 );
+    const double lon =   M_PI * ( drand48() - 0.5 );
+    vposition p1(lat,lon);
+    vposition p2(lat,lon);
+    if ( p1 == p2 ) {
+      EXPECT_FLOAT_EQ(p1.coords.a[0],p2.coords.a[0]);
+      EXPECT_FLOAT_EQ(p1.coords.a[1],p2.coords.a[1]);
+    }
+  }
+}
+
+
+TEST_F(VincentyBasicTest, CompareOperatorsDirAreOk) {
+  srand48(123456789);
+  const unsigned int loops = 50;
+  for ( unsigned int i=0; i<loops; ++i ) {
+    const double lat1 = 2*M_PI * ( drand48() - 0.5 );
+    const double lon1 =   M_PI * ( drand48() - 0.5 );
+    const double lat2 = 2*M_PI * ( drand48() - 0.5 );
+    const double lon2 =   M_PI * ( drand48() - 0.5 );
+    vdirection d1 = inverse(lat1,lon1,lat2,lon2);
+    vdirection d2 = inverse(lat1,lon1,lat2,lon2);
+    if ( d1 == d2 ) {
+      EXPECT_FLOAT_EQ(d1.bearing1,d2.bearing1);
+      EXPECT_FLOAT_EQ(d1.bearing2,d2.bearing2);
+      EXPECT_FLOAT_EQ(d1.distance,d2.distance);
+    }
+  }
+}
+
+
 // Two non-equal positions shall result in a non-negative distance.
 TEST_F(VincentyBasicTest, NonNegativeDistancesRandomized) {
   srand48(123456789);
@@ -202,6 +237,7 @@ class VincentyVerificationTest : public testing::Test
   vposition linkping;
   vposition uddevalla;
   vposition stockholm;
+  vposition karlstad;
   vposition alcatraz;
   vposition lady_liberty_statue;
   vposition saab_runway_north;
@@ -221,6 +257,7 @@ class VincentyVerificationTest : public testing::Test
         linkping( to_rad(58.415755),to_rad(15.625419)),
         uddevalla(to_rad(58.355630),to_rad(11.938019)),
         stockholm(to_rad(59.335991),to_rad(18.064270)),
+        karlstad( to_rad(59.381901),to_rad(13.504128)),
         alcatraz( to_rad(37.826663),to_rad(-122.423015)),
         lady_liberty_statue(to_rad(40.689526),to_rad(-74.044837)),
         saab_runway_north(to_rad(58.409693),to_rad(15.66272)),
@@ -307,14 +344,42 @@ TEST_F(VincentyVerificationTest, RealDistancesAreSane) {
       // this but not with real positions.
       EXPECT_FLOAT_EQ( dir1.distance, dir2.distance );
 
-      // Expect opposite bearings to be the exactly the same value only
-      // opposite direction, represented by a sign.
-      EXPECT_FLOAT_EQ( dir1.bearing1, -dir2.bearing2 );
-      EXPECT_FLOAT_EQ( dir2.bearing1, -dir1.bearing2 );
+      // Expect opposite bearings to be the same. Skip comparing the poles
+      // though, where directions are multiples of pi.
+      if ( ! fabs( 2*M_PI - dir1.bearing2 ) < 1e-6 &&
+           ! fabs( 2*M_PI - dir2.bearing2 ) < 1e-6 ) {
+        EXPECT_NEAR( dir1.bearing1, dir2.bearing2, 1e-6 );
+        EXPECT_NEAR( dir2.bearing1, dir1.bearing2, 1e-6 );
+      }
     }
   }
 }
 
+TEST_F(VincentyVerificationTest, MiddlePositionReciprocity) {
+  // From A to B
+  const vdirection d1 = inverse(uddevalla,stockholm);
+  const vposition  p_d1_b1 = direct(uddevalla,d1.bearing1,d1.distance/2);
+  const vposition  p_d1_b2 = direct(stockholm,d1.bearing2,d1.distance/2);
+
+  // From B to A
+  const vdirection d2 = inverse(stockholm,uddevalla);
+  const vposition  p_d2_b1 = direct(stockholm,d2.bearing1,d2.distance/2);
+  const vposition  p_d2_b2 = direct(uddevalla,d2.bearing2,d2.distance/2);
+
+  // Expect distances to be the same
+  EXPECT_FLOAT_EQ(d1.distance,d2.distance) << "Reciproce distance does not match";
+
+  // Expect bearings to be the same, from the two computations.
+  EXPECT_FLOAT_EQ(d1.bearing1,d2.bearing2);
+
+  // The all positions to be the same.
+  EXPECT_FLOAT_EQ(p_d1_b1.coords.a[0],p_d1_b2.coords.a[0]);
+  EXPECT_FLOAT_EQ(p_d1_b1.coords.a[1],p_d1_b2.coords.a[1]);
+  EXPECT_FLOAT_EQ(p_d1_b1.coords.a[0],p_d2_b1.coords.a[0]);
+  EXPECT_FLOAT_EQ(p_d1_b1.coords.a[1],p_d2_b1.coords.a[1]);
+  EXPECT_FLOAT_EQ(p_d2_b1.coords.a[0],p_d2_b2.coords.a[0]);
+  EXPECT_FLOAT_EQ(p_d2_b1.coords.a[1],p_d2_b2.coords.a[1]);
+}
 
 /**
  * Testing class for pure performance estimates.
@@ -354,7 +419,7 @@ TEST_F(VincentyPerformanceTest,PerformanceTest) {
   long memsize;
   if ( numpages > 0 && pagesize > 0 ) {
     // Lets use up 1/128 of the total memsize.
-    memsize = numpages*pagesize >> 7;
+    memsize = numpages*pagesize >> 9;
   } else {
     // Assume we have at least 2MiB (else just let the bastard swap).
     memsize = 2*1024*1024;

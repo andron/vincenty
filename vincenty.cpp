@@ -166,7 +166,7 @@ vdirection inverse( const double lat1,
   const double cos_U2 = cos(U2);
 #undef U1
 #undef U2
-  const double L = fabs(lon2-lon1);
+  const double L = lon2-lon1;
   double lambda  = L;
 
   double sin_lambda;
@@ -201,7 +201,7 @@ vdirection inverse( const double lat1,
         1 - pow(sin_alpha,2);
      
     double C;
-    if ( ulpcmp(cos2_alpha,0.0,32) ) {
+    if ( ulpcmp(cos2_alpha,0.0,16) ) {
       cos_2sigmam = 0;
       C = 0;
     } else {
@@ -218,7 +218,7 @@ vdirection inverse( const double lat1,
         ( sigma + C * sin_sigma * 
           ( cos_2sigmam + C * cos_sigma * 
             ( -1 + 2 * cos_2sigmam*cos_2sigmam ) ) );
-  } while ( fabs(_lambda-lambda) > accuracy && --i );
+  } while ( fabs(lambda-_lambda) > accuracy && --i );
   
   const double u2 = cos2_alpha * _f;
 
@@ -228,14 +228,23 @@ vdirection inverse( const double lat1,
                                  cos_sigma,
                                  cos_2sigmam );
   
-  const double p1p2 = atan2( cos_U2*sin_lambda ,
-                             cos_U1*sin_U2 - sin_U1*cos_U2*cos_lambda );
-  
-  const double p2p1 = atan2( -cos_U1*sin_lambda ,
-                             sin_U1*cos_U2 - cos_U1*sin_U2*cos_lambda );
-  
+  const double atany1 = cos_U2*sin_lambda;
+  const double atanx1 = cos_U1*sin_U2 - sin_U1*cos_U2*cos_lambda;
+  double p1p2 = atan2( atany1 , atanx1 );
+
+  if ( p1p2 < 0 ) {
+    p1p2 = p1p2 + 2*M_PI;
+  }
+
+  const double atany2 = cos_U1*sin_lambda;
+  const double atanx2 = -sin_U1*cos_U2 + cos_U1*sin_U2*cos_lambda;
+
+  // Scary, but the reverse bearing seems to need a "180 degree turn". At
+  // least to be correct with the intervall [0,2*M_PI].
+  double p2p1 = atan2( atany2 , atanx2 ) + M_PI;
+
   const double s = b * A_full_precision(u2) * ( sigma - delta_sigma );
-  
+
   return vdirection(p1p2,s,p2p1);
 }
 
