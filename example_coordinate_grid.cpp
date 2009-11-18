@@ -11,11 +11,12 @@ main(int, char** av)
 {
   std::cout << "Running: " << av[0] << std::endl;
 
+  std::cout.precision(3);
+
   vincenty::vposition sw(0.0,0.0); 
   vincenty::vposition ne = vincenty::direct(sw,vincenty::direction::northeast,1000);
-  
-  std::cout << sw << std::endl;
-  std::cout << ne << std::endl;
+
+  std::cout << sw << ":" << ne << ":" << sw - ne << std::endl;
 
   CoordinateGrid cg(sw,ne);
   cg.setVirtualGridSize(1000);

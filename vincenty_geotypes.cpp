@@ -93,6 +93,26 @@ bool operator==( const vposition& lhs, const vposition& rhs )
   }
 }
 
+vposition vposition::operator+( const vdirection& rhs ) const
+{
+  return direct((*this),rhs);
+}
+
+vposition vposition::operator-( const vdirection& rhs ) const
+{
+  return direct((*this),rhs.bearing2,rhs.distance);
+}
+
+vdirection vposition::operator-( const vposition& rhs ) const
+{
+  return inverse(rhs,(*this));
+}
+
+vposition vposition::operator^( const vposition& rhs ) const
+{
+  vdirection d = (*this) - rhs;
+  return direct((*this),d.bearing1,d.distance/2.0);
+}
 
 // Geographical direction
 // ------------------------------------------------------------------------
@@ -129,6 +149,16 @@ bool operator==( const vdirection& lhs, const vdirection& rhs )
   } else {
     return false;
   }
+}
+
+vdirection vdirection::operator/( const double rhs ) const
+{
+  return vdirection((*this).bearing1,(*this).distance/rhs);
+}
+
+vdirection vdirection::operator*( const double rhs ) const
+{
+  return vdirection((*this).bearing1,(*this).distance*rhs);
 }
 
 } // namespace end

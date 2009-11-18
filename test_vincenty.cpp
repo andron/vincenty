@@ -6,6 +6,8 @@
 #include <unistd.h>
 #include <sys/time.h>
 
+#include <sstream>
+
 #include <gtest/gtest.h>
 
 using namespace vincenty;
@@ -31,6 +33,11 @@ class VincentyBasicTest : public testing::Test
   const vposition northpole;
   const vposition southpole;
   const vposition sweden;
+  const vposition p1;
+  const vposition p2;
+  const vdirection dir025_15000;
+  const vdirection dir030_90000;
+  const vdirection dir240_60000;
 
   VincentyBasicTest()
       : la00lo00(0,0),
@@ -39,7 +46,12 @@ class VincentyBasicTest : public testing::Test
         nullposition_init(0.0,0.0),
         northpole(to_rad( 90.0),0.0),
         southpole(to_rad(-90.0),0.0),
-        sweden(to_rad(58),to_rad(16))
+        sweden(to_rad(58),to_rad(16)),
+        p1(to_rad(50.111),to_rad(11.111)),
+        p2(to_rad(60.111),to_rad(18.111)),
+        dir025_15000(to_rad(25), 15000),
+        dir030_90000(to_rad(30), 90000),
+        dir240_60000(to_rad(240),60000)
   {
   }
 
@@ -213,6 +225,35 @@ TEST_F(VincentyBasicTest, SeparationDistances) {
   }
 }
 
+
+TEST_F(VincentyBasicTest, AritmeticOperatorsAreOk) {
+  vposition pa = p1 + dir240_60000;
+  vposition pb = p2 + dir030_90000;
+
+  vposition px = p1 ^ p2;
+  vposition py = pa ^ pb;
+
+  vdirection d1 = px - p1;
+  vdirection d2 = py - px;
+  vdirection d3 = pb - py;
+  vdirection d4 = p2 - p1;
+  vdirection d5 = pb - p2;
+  vdirection d6 = pa - pb;
+  vdirection d7 = p1 - pa;
+
+  // Hmm, wonder if this really fits the criteria of a "sane" test. If the
+  // ostream output is equal we assume the positions are equal, or at least
+  // equal enough.
+  std::stringstream str1,str2,str3,str4;
+ 
+  str1 << p1+d4+d5;
+  str2 << p1+d1+d2+d3;
+  EXPECT_EQ(str1.str(),str2.str());
+
+  str3 << p1;
+  str4 << pb+d6+d7;
+  EXPECT_EQ(str3.str(),str4.str());
+}
 
 // ---------------------------------------------------------------------------
 

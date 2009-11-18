@@ -507,20 +507,19 @@ CoordinateGrid::_split()
           // the two points. The distance between grid points for the new grid
           // is the old size / 2.
           const vdirection a = inverse(_grid[m][u],_grid[m][v]);
-          grid[i][j] = direct(_grid[m][u],a.bearing1,a.distance/2);
+          grid[i][j] = direct(_grid[m][u],a.bearing1,a.distance/2.0);
         }
       } else {
         if ( j%2 == 0 ) {
           // Same case as with even i-index.
           const vdirection a = inverse(_grid[m][u],_grid[n][u]);
-          grid[i][j] = direct(_grid[m][u],a.bearing1,a.distance/2);
+          grid[i][j] = direct(_grid[m][u],a.bearing1,a.distance/2.0);
         } else {
           // When both index i and j are odd we have point which is not on an
           // old edge but rather in the middle of the old square. Create a
-          // diagonal line and find the middle point. The distance is now
-          // square root of 2 times the old grid distance.
+          // diagonal line and find the middle point.
           const vdirection a = inverse(_grid[m][u],_grid[n][v]);
-          grid[i][j] = direct(_grid[m][u],a.bearing1,sqrt(2)*a.distance);
+          grid[i][j] = direct(_grid[m][u],a.bearing1,a.distance/2.0);
         }
       }
     }

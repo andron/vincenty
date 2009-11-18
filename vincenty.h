@@ -47,6 +47,9 @@ typedef float  v4sf __attribute__((vector_size(16)));
  */
 namespace vincenty {
 
+class vposition;
+class vdirection;
+
 /*! @addtogroup vector_operands Vector operands
  * @brief Unions for holding vector operands.
  *
@@ -72,7 +75,7 @@ union v4sf_u {
  * Decides the maximum error in the calculations of a position. A value of
  * \f$10^{-10}\f$ gives and error of \f$<0.1\f$ [m].
  */
-static const double default_accuracy = 1.0e-10;
+static const double default_accuracy = 1.0e-12;
 
 
 /*!
@@ -176,6 +179,11 @@ class vposition
 
   friend std::ostream& operator<<( std::ostream& os, const vposition& rhs );
   friend bool operator==( const vposition& lhs, const vposition& rhs );
+
+  vposition operator+( const vdirection& rhs ) const;
+  vposition operator-( const vdirection& rhs ) const;
+  vdirection operator-( const vposition& rhs ) const;
+  vposition operator^( const vposition& rhs ) const;
 };
 
 //! Vector of vpositions.
@@ -205,12 +213,15 @@ class vdirection
 
   //! The distance between two positions.
   double distance;
-      
+
   //! Bearing from the "second" positions to the "first".
   double bearing2;
-   
+
   friend std::ostream& operator<<( std::ostream& os, const vdirection& rhs );
   friend bool operator==( const vdirection& lhs, const vdirection& rhs );
+
+  vdirection operator/( const double rhs ) const;
+  vdirection operator*( const double rhs ) const;
 };
 
 //! Vector of vdirections.
