@@ -187,7 +187,7 @@ class vposition
 };
 
 //! Vector of vpositions.
-typedef std::vector<vposition> vposition_v;
+typedef std::vector<vposition> vposition_vector;
 
 /*!
  * @brief Class for handling a direction.
@@ -225,7 +225,7 @@ class vdirection
 };
 
 //! Vector of vdirections.
-typedef std::vector<vdirection> vdirection_v;
+typedef std::vector<vdirection> vdirection_vector;
 
 
 // ------------------------------------------------------------------------

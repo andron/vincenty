@@ -3,6 +3,7 @@
 
 #include <cstdlib>
 #include <iostream>
+#include <string>
 
 double get_geodata(const double& lat, const double& lon) __attribute__((pure));
 
@@ -13,22 +14,19 @@ main(int, char** av)
 
   std::cout.precision(3);
 
-  vincenty::vposition sw(0.0,0.0); 
-  vincenty::vposition ne = vincenty::direct(sw,vincenty::direction::northeast,1000);
+  vincenty::vposition a(0.0,0.0); 
+  vincenty::vposition b(0.0,M_PI);
 
-  std::cout << sw << ":" << ne << ":" << sw - ne << std::endl;
+  vincenty::vdirection d = vincenty::inverse(a,b);
 
-  CoordinateGrid cg(sw,ne);
-  cg.setVirtualGridSize(1000);
-  cg.splitUntil(1e4);
+  std::cout << vincenty::format::deg << d << std::endl;
 
-  std::cout
-      << std::endl << cg << std::endl << std::endl
-      << cg(0,0) << std::endl
-      << cg(0,999) << std::endl
-      << cg(999,0) << std::endl
-      << cg(999,999) << std::endl;
-  
+  CoordinateGrid cg(a,d.distance,2e7);
+  cg.splitUntil(5e4);
+
+  std::string s;
+  std::cin >> s;
+
   return 0;
 }
 

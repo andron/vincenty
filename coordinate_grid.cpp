@@ -105,6 +105,7 @@ interpolate_position( const vposition& A,
 
 /**@}*/
 
+namespace coordinate {
 
 #define DEFAULT_INIT                            \
   _grid(),                                      \
@@ -131,13 +132,16 @@ CoordinateGrid::CoordinateGrid( const vincenty::vposition& southwest_position,
 
   // Compute middle point and use as center.
   const vdirection a = inverse(_grid[2][0],_grid[0][2]);
-  _grid[1][1] = direct(_grid[2][0],a.bearing1,a.distance/2);
+  _grid[1][1] = direct(_grid[2][0],a.bearing1,a.distance/2.0);
 
-  // Set grid distance.
-  _grid_distance = a.distance / sqrt(2);
+  // UL and LR have the same distance as LL and UR.
+  _grid[0][0] = direct(_grid[1][1],direction::northwest,a.distance);
+  _grid[2][2] = direct(_grid[1][1],direction::southeast,a.distance);
 
-  // Initialize "again" from the new center.
-  _initialize_from_center();
+  // Compute _grid_distance to use as base distance for N,E,W,S.
+  _grid_distance = a.distance / ( 2*sqrt(2.0) );
+
+  _initialize_news_from_center();
 }
 
 
@@ -156,7 +160,8 @@ CoordinateGrid::CoordinateGrid( const vincenty::vposition& southwest_position,
   _grid[0][2] = northeast_position;
   _grid[2][2] = southeast_position;
 
-  _initialize_from_corners();
+  _initialize_news_from_corners();
+  _initialize_center_from_corners();
 }
 
 
@@ -240,40 +245,58 @@ operator<<( std::ostream& os, CoordinateGrid& rhs )
 void
 CoordinateGrid::_initialize_from_center()
 {
-  const vposition center = _grid[1][1];
-
-  _grid[0][1] = direct( center, direction::north, _grid_distance );
-  _grid[1][2] = direct( center, direction::east , _grid_distance );
-  _grid[2][1] = direct( center, direction::south, _grid_distance );
-  _grid[1][0] = direct( center, direction::west , _grid_distance );
-
-  _grid[0][2] = direct( center, direction::northeast, sqrt(2)*_grid_distance );
-  _grid[2][2] = direct( center, direction::southeast, sqrt(2)*_grid_distance );
-  _grid[2][0] = direct( center, direction::southwest, sqrt(2)*_grid_distance );
-  _grid[0][0] = direct( center, direction::northwest, sqrt(2)*_grid_distance );
+  _initialize_corners_from_center();
+  _initialize_news_from_corners();
 }
 
+void
+CoordinateGrid::_initialize_news_from_center()
+{
+  _grid[0][1] = direct( _grid[1][1], direction::north, _grid_distance );
+  _grid[1][2] = direct( _grid[1][1], direction::east , _grid_distance );
+  _grid[2][1] = direct( _grid[1][1], direction::south, _grid_distance );
+  _grid[1][0] = direct( _grid[1][1], direction::west , _grid_distance );
+}
 
 void
-CoordinateGrid::_initialize_from_corners()
+CoordinateGrid::_initialize_corners_from_center()
 {
-  // All edges.
-  vdirection a;
-  a = inverse(_grid[0][0],_grid[0][2]);
-  _grid[0][1] = direct(_grid[0][0],a.bearing1,a.distance/2);
-   
-  a = inverse(_grid[0][0],_grid[2][0]);
-  _grid[1][0] = direct(_grid[0][0],a.bearing1,a.distance/2);
-   
-  a = inverse(_grid[0][2],_grid[2][2]);
-  _grid[1][2] = direct(_grid[0][2],a.bearing1,a.distance/2);
+  _grid[0][2] = direct( _grid[1][1], direction::northeast, sqrt(2.0)*_grid_distance );
+  _grid[2][2] = direct( _grid[1][1], direction::southeast, sqrt(2.0)*_grid_distance );
+  _grid[2][0] = direct( _grid[1][1], direction::southwest, sqrt(2.0)*_grid_distance );
+  _grid[0][0] = direct( _grid[1][1], direction::northwest, sqrt(2.0)*_grid_distance );
+}
 
-  a = inverse(_grid[2][0],_grid[2][2]);
-  _grid[2][1] = direct(_grid[2][0],a.bearing1,a.distance/2);
+void
+CoordinateGrid::_initialize_news_from_corners()
+{
+  const vdirection d1 = inverse(_grid[0][0],_grid[0][2]);
+  const vdirection d2 = inverse(_grid[0][0],_grid[2][0]);
+  const vdirection d3 = inverse(_grid[0][2],_grid[2][2]);
+  const vdirection d4 = inverse(_grid[2][0],_grid[2][2]);
+  _grid[0][1] = direct(_grid[0][0],d1.bearing1,d1.distance/2.0);
+  _grid[1][0] = direct(_grid[0][0],d2.bearing1,d2.distance/2.0);
+  _grid[1][2] = direct(_grid[0][2],d3.bearing1,d3.distance/2.0);
+  _grid[2][1] = direct(_grid[2][0],d4.bearing1,d4.distance/2.0);
+}
 
-  // And the center.
-  a = inverse(_grid[0][1],_grid[2][1]);
-  _grid[1][1] = direct(_grid[0][1],a.bearing1,a.distance/2);
+void
+CoordinateGrid::_initialize_center_from_corners()
+{
+  const vdirection d1 = inverse(_grid[2][0],_grid[0][2]);
+  const vdirection d2 = inverse(_grid[0][0],_grid[2][2]);
+  const vdirection d3 = inverse(_grid[0][1],_grid[2][1]);
+  const vdirection d4 = inverse(_grid[1][2],_grid[1][0]);
+
+  vposition c1 = direct(_grid[2][0],d1.bearing1,d1.distance/2.0);
+  vposition c2 = direct(_grid[0][0],d2.bearing1,d2.distance/2.0);
+  vposition c3 = direct(_grid[0][1],d3.bearing1,d3.distance/2.0);
+  vposition c4 = direct(_grid[1][2],d4.bearing1,d4.distance/2.0);
+
+  std::cout << c1 << std::endl;
+  std::cout << c2 << std::endl;
+  std::cout << c3 << std::endl;
+  std::cout << c4 << std::endl;
 }
 
 
@@ -423,13 +446,13 @@ CoordinateGrid::getUR() const
 }
 
 vposition
-CoordinateGrid::getLL() const
+CoordinateGrid::getDL() const
 {
   return getSW();
 }
 
 vposition
-CoordinateGrid::getLR() const
+CoordinateGrid::getDR() const
 {
   return getSE();
 }
@@ -609,4 +632,6 @@ CoordinateGrid::operator()( unsigned int i, unsigned int j ) const
   vposition pos;
   interpolate_position( A, B, C, D, dj, di, pos );
   return pos;
+}
+
 }

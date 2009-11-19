@@ -152,20 +152,20 @@ std::ostream& operator<<( std::ostream& os, const vposition& rhs )
   os.setf( std::ios::fixed );
   if ( os.iword(format::coordtype()) == format::DMS ) {
     os << "["
-       << std::setw(2) << vposition::deg(rhs.coords.a[0]) << "°" 
-       << std::setw(2) << vposition::min(rhs.coords.a[0]) << "'" 
-       << std::setw(std::cout.precision()+3)
+       << std::setw(3) << vposition::deg(rhs.coords.a[0]) << "°" 
+       << std::setw(3) << vposition::min(rhs.coords.a[0]) << "'" 
+       << std::setw(std::cout.precision()+4)
        << vposition::secf(rhs.coords.a[0]) << "\"" << ","
-       << std::setw(2) << vposition::deg(rhs.coords.a[1]) << "°" 
-       << std::setw(2) << vposition::min(rhs.coords.a[1]) << "'" 
-       << std::setw(std::cout.precision()+3)
+       << std::setw(3) << vposition::deg(rhs.coords.a[1]) << "°" 
+       << std::setw(3) << vposition::min(rhs.coords.a[1]) << "'"
+       << std::setw(std::cout.precision()+4)
        << vposition::secf(rhs.coords.a[1]) << "\"]";
   } else if ( os.iword(format::coordtype()) == format::DM ) {
     os << "["
-       << std::setw(2) << vposition::deg(rhs.coords.a[0]) << "°" 
+       << std::setw(3) << vposition::deg(rhs.coords.a[0]) << "°" 
        << std::setw(std::cout.precision()+3)
        << vposition::minf(rhs.coords.a[0]) << "'" << ","
-       << std::setw(2) << vposition::deg(rhs.coords.a[1]) << "°" 
+       << std::setw(3) << vposition::deg(rhs.coords.a[1]) << "°" 
        << std::setw(std::cout.precision()+3)
        << vposition::minf(rhs.coords.a[1]) << "']";
   } else if ( os.iword(format::coordtype()) == format::DD ) {

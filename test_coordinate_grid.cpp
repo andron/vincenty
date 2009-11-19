@@ -9,6 +9,7 @@
 #include <gtest/gtest.h>
 
 using namespace vincenty;
+using namespace coordinate;
 
 namespace Test {
 
@@ -27,9 +28,9 @@ class CoordinateGridBasicTest : public testing::Test
   const vposition nullposition_init;
   const vposition northpole;
   const vposition southpole;
-  const vposition sweden_sw;
-  const vposition sweden_ne;
-  vposition sweden_center;
+  const vposition sw;
+  const vposition ne;
+  vposition center;
 
   CoordinateGridBasicTest()
       : la00lo00(0,0),
@@ -38,11 +39,12 @@ class CoordinateGridBasicTest : public testing::Test
         nullposition_init(0.0,0.0),
         northpole(to_rad( 90.0),0.0),
         southpole(to_rad(-90.0),0.0),
-        sweden_sw(to_rad(58),to_rad(16)),
-        sweden_ne(to_rad(58.5),to_rad(16.5))
+        sw(to_rad(55),to_rad(16)),
+        ne(to_rad(59.5),to_rad(16.5)),
+        center(0.0,0.0)
   {
-    vdirection d = inverse(sweden_sw,sweden_ne);
-    sweden_center = direct(sweden_sw,d.bearing1,d.distance/2);
+    vdirection d = inverse(sw,ne);
+    center = direct(sw,d.bearing1,d.distance/2.0);
   }
 
   virtual ~CoordinateGridBasicTest() 
@@ -52,15 +54,33 @@ class CoordinateGridBasicTest : public testing::Test
 };
 
 
-TEST_F(CoordinateGridBasicTest, TwoPosInitializationCenterIsOk) {
-  CoordinateGrid cg(sweden_sw,sweden_ne);
-  EXPECT_EQ(cg.getCenter(),sweden_center) << "Center position is off";
+TEST_F(CoordinateGridBasicTest, TwoPosInitializationCenterOk) {
+  CoordinateGrid cg(sw,ne);
+  EXPECT_EQ(cg.getCenter(),center) << "Center position is off";
 }
 
-TEST_F(CoordinateGridBasicTest, TwoPosInitializationCornersAreOk) {
-  CoordinateGrid cg(sweden_sw,sweden_ne);
-  EXPECT_EQ(sweden_sw,cg.getSW()) << "South west position is off";
-  EXPECT_EQ(sweden_ne,cg.getNE()) << "North east position is off";
+TEST_F(CoordinateGridBasicTest, TwoPosInitializationCornersOk) {
+  CoordinateGrid cg(sw,ne);
+  EXPECT_EQ(sw,cg.getSW()) << "South west position is off";
+  EXPECT_EQ(ne,cg.getNE()) << "North east position is off";
+}
+
+TEST_F(CoordinateGridBasicTest, FourPosInitializationCornersOk) {
+
+  vposition sw(-1.00,-1.00);
+  vposition nw( 1.00,-1.00);
+  vposition ne( 1.00, 1.00);
+  vposition se(-1.00, 1.01);
+
+  std::cout << sw << std::endl;
+  std::cout << nw << std::endl;
+  std::cout << ne << std::endl;
+  std::cout << se << std::endl;
+
+  CoordinateGrid cg(sw,nw,ne,se);
+
+  std::cout << cg << std::endl;
+  
 }
 
 }

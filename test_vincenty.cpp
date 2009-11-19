@@ -485,8 +485,7 @@ TEST_F(VincentyPerformanceTest,PerformanceTest) {
   // Assert that we have enough positions.
   ASSERT_GT( positions.size(), 1 );
 
-  std::cout
-      << "Num positions:  " << positions.size() << std::endl;
+  std::cout << "Num positions:  " << positions.size() << std::endl;
   
 
   // Compute "sibling" vdirection using inverse formula. Store the vdirection

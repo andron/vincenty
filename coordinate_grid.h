@@ -26,8 +26,11 @@
 #include <vector>
 #include <iostream>
 
+namespace coordinate {
+
 typedef std::vector< vincenty::vposition > coord_vector;
 typedef std::vector< coord_vector > coord_grid;
+typedef std::vector< unsigned int[2] > index_vector;
 
 /*!
  * @brief Class for handling a grid of coordinates.
@@ -165,12 +168,15 @@ class CoordinateGrid
       //!  Minimum distance between points.
       const unsigned int minimum_grid_point_distance );
 
-  //! Operator for accessing a grid point within the virtual grid.
+  //! Operator for accessing a grid index within the virtual grid.
 	vincenty::vposition operator()(
       //! Row counted from up down.
       unsigned int i,
       //! Column from left to right.
       unsigned int j ) const;
+
+  //! Operator for accessing a vector of indexes.
+  //vincenty::vposition_vector operator(std::vector<int,int>);
 
   //! Operator for printing a grid to a stream.
   friend std::ostream& operator<<( std::ostream& os, CoordinateGrid& rhs );
@@ -186,8 +192,8 @@ class CoordinateGrid
 
   vincenty::vposition getUL() const;
   vincenty::vposition getUR() const;
-  vincenty::vposition getLL() const;
-  vincenty::vposition getLR() const;
+  vincenty::vposition getDL() const;
+  vincenty::vposition getDR() const;
   // ----------------------------------------------------------------------
 
  private:
@@ -204,18 +210,27 @@ class CoordinateGrid
       //! Initializes the grid, with a "grid".
       const coord_grid& init_coord_grid );
 
-  //! Initializes the grid with a default 9 point setup from center.
+  //! Initializes all other positions from center.
   void _initialize_from_center();
 
-  //! Initializes the grid with a default 9 point setup from corners.
-  void _initialize_from_corners();
-   
+  //! Initializes n.e.w.s from center.
+  void _initialize_news_from_center();
+
+  //! Initializes corners from center.
+  void _initialize_corners_from_center();
+
+  //! Initializes n.e.w.s from corners.
+  void _initialize_news_from_corners();
+
+  //! Initializes center from corners.
+  void _initialize_center_from_corners();
+
   //! Real implementation for splitting.
   void _split();
 
   //! Real implementation for joining.
   void _join();
-   
+
   //! Zeropads a coordinate grid vector-vector structure.
   void _padcopy( coord_grid& dst, const coord_grid& src );
 
@@ -248,5 +263,7 @@ class CoordinateGrid
    */
   double _virtual_grid_distance;
 };
+  
+}
 
 #endif
