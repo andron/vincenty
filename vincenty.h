@@ -74,8 +74,10 @@ union v4sf_u {
  *
  * Decides the maximum error in the calculations of a position. A value of
  * \f$10^{-10}\f$ gives and error of \f$<0.1\f$ [m].
+ *
+ * Has an impact on performance!!
  */
-static const double default_accuracy = 1.0e-12;
+static const double default_accuracy = 1.0e-11;
 
 
 /*!

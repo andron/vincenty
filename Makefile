@@ -69,7 +69,11 @@ check: test
 	./test_coordinate_grid
 
 distclean:
-	-rm -f test_vincenty test_coordinate_grid example_coordinate_grid *.so* *.o *~ *.d
+	-rm -f  *.so* *.o *~ *.d \
+	test_vincenty \
+	test_coordinate_grid \
+	test_angle_correction \
+	example_coordinate_grid
 
 doc:
 	doxygen

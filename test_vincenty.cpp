@@ -246,6 +246,11 @@ TEST_F(VincentyBasicTest, AritmeticOperatorsAreOk) {
   // equal enough.
   std::stringstream str1,str2,str3,str4;
  
+  str1.precision(5);
+  str2.precision(str1.precision());
+  str3.precision(str1.precision());
+  str4.precision(str1.precision());
+
   str1 << p1+d4+d5;
   str2 << p1+d1+d2+d3;
   EXPECT_EQ(str1.str(),str2.str());

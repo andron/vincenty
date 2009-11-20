@@ -67,20 +67,34 @@ TEST_F(CoordinateGridBasicTest, TwoPosInitializationCornersOk) {
 
 TEST_F(CoordinateGridBasicTest, FourPosInitializationCornersOk) {
 
-  vposition sw(-1.00,-1.00);
-  vposition nw( 1.00,-1.00);
-  vposition ne( 1.00, 1.00);
-  vposition se(-1.00, 1.01);
+  vposition sw( 0.00,0.00);
+  vposition nw( 0.30,0.10);
+  vposition ne( 0.30,0.35);
+  vposition se(-0.01,0.30);
 
-  std::cout << sw << std::endl;
-  std::cout << nw << std::endl;
-  std::cout << ne << std::endl;
-  std::cout << se << std::endl;
+  /*
+    std::cout << format::dd;
+    std::cout << sw << std::endl;
+    std::cout << nw << std::endl;
+    std::cout << ne << std::endl;
+    std::cout << se << std::endl;
+  */
 
   CoordinateGrid cg(sw,nw,ne,se);
 
-  std::cout << cg << std::endl;
-  
+  // Expect the "middle" point to be within boundries.
+
+  ASSERT_GT(cg.getCenter().coords.a[0],cg.getSW().coords.a[0]);
+  ASSERT_GT(cg.getCenter().coords.a[1],cg.getSW().coords.a[1]);
+
+  ASSERT_LT(cg.getCenter().coords.a[0],cg.getNE().coords.a[0]);
+  ASSERT_LT(cg.getCenter().coords.a[1],cg.getNE().coords.a[1]);
+
+  ASSERT_LT(cg.getCenter().coords.a[0],cg.getNW().coords.a[0]);
+  ASSERT_GT(cg.getCenter().coords.a[1],cg.getNW().coords.a[1]);
+
+  ASSERT_GT(cg.getCenter().coords.a[0],cg.getSE().coords.a[0]);
+  ASSERT_LT(cg.getCenter().coords.a[1],cg.getSE().coords.a[1]);
 }
 
 }

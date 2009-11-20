@@ -177,7 +177,8 @@ CoordinateGrid::CoordinateGrid( const vposition& center,
   _grid = coord_grid( init_size, coord_vector(init_size, vposition(0,0)) );
   _grid[1][1] = center;
   _virtual_grid_distance = 2*radius/_virtual_grid_size;
-  _initialize_from_center();
+  _initialize_corners_from_center();
+  _initialize_news_from_center();
 }
 
 
@@ -245,8 +246,6 @@ operator<<( std::ostream& os, CoordinateGrid& rhs )
 void
 CoordinateGrid::_initialize_from_center()
 {
-  _initialize_corners_from_center();
-  _initialize_news_from_corners();
 }
 
 void
@@ -293,10 +292,21 @@ CoordinateGrid::_initialize_center_from_corners()
   vposition c3 = direct(_grid[0][1],d3.bearing1,d3.distance/2.0);
   vposition c4 = direct(_grid[1][2],d4.bearing1,d4.distance/2.0);
 
-  std::cout << c1 << std::endl;
-  std::cout << c2 << std::endl;
-  std::cout << c3 << std::endl;
-  std::cout << c4 << std::endl;
+  /**
+   * @todo Getting a center from 4 arbitrary corners are not that easy, and
+   * the current solution of averaging the values of 4 positions is NOT
+   * verified by any authority.
+   */
+  _grid[1][1] = vposition( (c1.coords.a[0] +
+                            c2.coords.a[0] +
+                            c3.coords.a[0] +
+                            c4.coords.a[0]) / 4.0
+                           ,
+                           (c1.coords.a[1] +
+                            c2.coords.a[1] +
+                            c3.coords.a[1] +
+                            c4.coords.a[1]) / 4.0
+                           );
 }
 
 
