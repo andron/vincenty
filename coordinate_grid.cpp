@@ -5,7 +5,7 @@
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
-  modification, are permitted provided that the following conditions are met:
+  modification, are Permitted provided that the following conditions are met:
 
   * Redistributions of source code must retain the above copyright notice,
   this list of conditions and the following disclaimer.
@@ -36,7 +36,7 @@ using namespace vincenty;
 /**
  * Standard 2D interpolation.
  */
-static inline double
+double
 interpolate2d( const double A,
                const double B,
                const double C,
@@ -56,7 +56,7 @@ interpolate2d( const double A,
  *
  * Longitude and latitude values are interpolated separately.
  */
-static inline void
+void
 interpolate_position( const vposition& A,
                       const vposition& B,
                       const vposition& C,
@@ -123,8 +123,8 @@ CoordinateGrid::CoordinateGrid( const vincenty::vposition& southwest_position,
                                 const vincenty::vposition& northeast_position )
     : DEFAULT_INIT
 {
-  const unsigned short init_size = 3;
-  _grid = coord_grid( init_size, coord_vector(init_size, vposition(0,0)) );
+  coord_vector cv(3,vposition(0,0));
+  _grid = coord_grid(3,cv);
 
   // Set the two corners.
   _grid[2][0] = southwest_position;
@@ -151,8 +151,8 @@ CoordinateGrid::CoordinateGrid( const vincenty::vposition& southwest_position,
                                 const vincenty::vposition& southeast_position )
     : DEFAULT_INIT
 {
-  const unsigned int init_size = 3;
-  _grid = coord_grid( init_size, coord_vector(init_size, vposition(0,0)) );
+  coord_vector cv(3,vposition(0,0));
+  _grid = coord_grid(3,cv);
 
   // The four corners.
   _grid[2][0] = southwest_position;
@@ -173,8 +173,9 @@ CoordinateGrid::CoordinateGrid( const vposition& center,
       _grid_distance(radius),
       _virtual_grid_distance(0)
 {
-  const unsigned int init_size = 3;
-  _grid = coord_grid( init_size, coord_vector(init_size, vposition(0,0)) );
+  coord_vector cv(3,vposition(0,0));
+  _grid = coord_grid(3,cv);
+
   _grid[1][1] = center;
   _virtual_grid_distance = 2*radius/_virtual_grid_size;
   _initialize_corners_from_center();
@@ -513,10 +514,11 @@ CoordinateGrid::_split()
   // (only containing positions at 0,0).
   coord_grid grid( new_grid_size, coord_vector( new_grid_size ) );
 
-  // Variables i and j loops columns and rows repectively over the new raster,
+  // Variables i and j loops columns and rows repectively in the new grid,
   // which is supposed to be filled with new data.  Indexes m and n handles
-  // the column index while u and v are used for row indexing. Index m is the
-  // "smaller" of m and n, and u is the smaller of u and v.
+  // the column indexing while u and v are for row indexing in the old
+  // grid. Index m and u are the "smaller" indexes, i.e. upper most and left
+  // most.
   for ( unsigned int i=0; i<new_grid_size; ++i ) {
     const unsigned int m = i/2;
     const unsigned int n = (i+1)/2;
@@ -642,6 +644,18 @@ CoordinateGrid::operator()( unsigned int i, unsigned int j ) const
   vposition pos;
   interpolate_position( A, B, C, D, dj, di, pos );
   return pos;
+}
+
+
+coord_vector
+CoordinateGrid::getPositions( index_vector iv ) const
+{
+  coord_vector cv(iv.size());
+  index_vector::const_iterator it = iv.begin();
+  for ( ; it != iv.end() ; ++it ) {
+    cv.push_back( (*this)((*it)[0],(*it)[1]) );
+  }
+  return cv;
 }
 
 }

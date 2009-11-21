@@ -175,6 +175,11 @@ class CoordinateGrid
       //! Column from left to right.
       unsigned int j ) const;
 
+  //! Gets positions via a vector of indexes.
+  coord_vector getPositions(
+      //! A vector containing indexes as an array[2].
+      index_vector ) const;
+  
   //! Operator for accessing a vector of indexes.
   //vincenty::vposition_vector operator(std::vector<int,int>);
 

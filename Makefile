@@ -25,7 +25,7 @@ CXXFLAGS := -pipe -fpic -g -MMD -W -Wall -Wextra -pedantic -Weffc++
 LDFLAGS := -Wl,--as-needed -Wl,--no-undefined -Wl,-rpath=./ -L./
 
 ifdef tune
-CXXFLAGS += -O3 -mtune=native
+CXXFLAGS += -O3 -march=native -msse3
 else
 ifdef debug
 CXXFLAGS += -O0

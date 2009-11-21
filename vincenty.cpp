@@ -306,7 +306,7 @@ double to_deg( const double radians )
 
 
 // ULP compare of doubles.
-bool
+inline bool
 ulpcmp( const double x, const double y, const uint64_t ulpdiff ) {
   assert( ulpdiff <= 1024*1024 );
   typedef uint64_t __attribute__((__may_alias__)) alias_t;
