@@ -34,10 +34,10 @@ const double b  = 6356752.3142;
 const double f  = (a-b)/a;
 const double _f = ((a*a) / (b*b)) - 1;
 
-inline double A_full_precision( const double ) __attribute__ ((pure));
-inline double B_full_precision( const double ) __attribute__ ((pure));
+double A_full_precision( const double ) __attribute__ ((pure));
+double B_full_precision( const double ) __attribute__ ((pure));
 
-inline double deltasigma_full_precision(
+double deltasigma_full_precision(
     const double,
     const double,
     const double,
@@ -55,7 +55,7 @@ vposition direct( const double lat,
                   const double s,
                   const double accuracy ) {
   // If equal return immediately.
-  if ( ulpcmp(0,s) ) {
+  if ( ulpcmp_inline(0,s) ) {
     return vposition(lat,lon);
   }
   const double tan_U1     = (1-f) * tan(lat);
@@ -78,22 +78,22 @@ vposition direct( const double lat,
   double cos_sigma;
   double cos_2sigmam;
 
-  // Prevent loop deadlock.
-  unsigned int i = 10;
+  // Prevent loop deadlock. Average loop count is 2-4 before accuracy is
+  // reached. Vincentys algorithm converges fast.
+  unsigned int i = 6;
   do {
     sin_sigma   = sin(sigma);
     cos_sigma   = cos(sigma);
     cos_2sigmam = cos( 2*sigma1 + sigma );
-      
+
     const double delta_sigma = 
         deltasigma_full_precision(B,sin_sigma,cos_sigma,cos_2sigmam);
 
     _sigma = sigma;
     sigma = s / (b*A) + delta_sigma;
   } while ( fabs(sigma-_sigma) > accuracy && --i );
-   
-  const double C = 
-      f/16*cos2_alpha * ( 4 + f*(4-3*cos2_alpha) );
+
+  const double C = f/16*cos2_alpha * ( 4 + f*(4-3*cos2_alpha) );
 
   const double lambda = 
       atan2( sin_sigma*sin_alpha1,
@@ -107,17 +107,15 @@ vposition direct( const double lat,
                         C*cos_sigma * ( -1 +
                                         2*cos_2sigmam*cos_2sigmam) ) );
    
-  const double tmp = 
-      sin_U1*sin_sigma - cos_U1*cos_sigma*cos_alpha1;
+  const double tmp =  sin_U1*sin_sigma - cos_U1*cos_sigma*cos_alpha1;
    
-  const double lat2 = 
-      atan2( sin_U1*cos_sigma + cos_U1*sin_sigma*cos_alpha1, 
-             (1-f)*sqrt( sin_alpha*sin_alpha + tmp*tmp ) );
-
+  const double lat2 = atan2( sin_U1*cos_sigma + cos_U1*sin_sigma*cos_alpha1, 
+                             (1-f)*sqrt( sin_alpha*sin_alpha + tmp*tmp ) );
+  
   /*
-    Skip computing the reversed bearing, the returned position does not
-    have a member to return the value. The implementation of how the
-    bearing is computed is keept as reference.
+    Skip computing the reversed bearing, the returned position does not have a
+    member to return the value. The implementation of how the bearing is
+    computed is keept as reference.
   */
   //const double bearing_reversed = atan2(-sin_alpha, tmp);
    
@@ -154,8 +152,8 @@ vdirection inverse( const double lat1,
                     const double lon2,
                     const double accuracy ) {
   // If equal return immediately.
-  if ( ulpcmp(lat1,lat2) &&
-       ulpcmp(lon1,lon2) ) {
+  if ( ulpcmp_inline(lat1,lat2) &&
+       ulpcmp_inline(lon1,lon2) ) {
     return vdirection(0.0,0.0,0.0);
   }
 #define U1 atan( (1-f) * tan(lat1) )
@@ -180,71 +178,62 @@ vdirection inverse( const double lat1,
   double sigma;
   double _lambda;
 
-  // Prevent loop deadlock.
-  unsigned int i = 10;
+  // Prevent loop deadlock. Average loop count is 2-4 before accuracy is
+  // reached. Vincentys algorithm converges fast.
+  unsigned int i = 6;
   do {
-    sin_lambda =
-        sin(lambda);
-    cos_lambda =
-        cos(lambda);
+    sin_lambda = sin(lambda);
+    cos_lambda = cos(lambda);
+    
+    sin_sigma = sqrt( pow(cos_U2*sin_lambda,2) + 
+                      pow(cos_U1*sin_U2 - sin_U1*cos_U2*cos_lambda,2) );
 
-    sin_sigma = 
-        sqrt( pow(cos_U2*sin_lambda,2) + 
-              pow(cos_U1*sin_U2 - sin_U1*cos_U2*cos_lambda,2) );
-    cos_sigma =
-        sin_U1*sin_U2 + cos_U1*cos_U2*cos_lambda;
+    cos_sigma = sin_U1*sin_U2 + cos_U1*cos_U2*cos_lambda;
+
+    sigma = atan2( sin_sigma, cos_sigma );
      
-    const double sin_alpha = 
-        cos_U1*cos_U2*sin_lambda/sin_sigma;
+    const double sin_alpha = cos_U1*cos_U2*sin_lambda/sin_sigma;
      
-    cos2_alpha =
-        1 - pow(sin_alpha,2);
+    cos2_alpha = 1 - pow(sin_alpha,2);
+
+    _lambda = lambda;
      
-    double C;
-    if ( ulpcmp(cos2_alpha,0.0,16) ) {
+    if ( ulpcmp_inline(cos2_alpha,0.0,16) ) {
       cos_2sigmam = 0;
-      C = 0;
+      lambda = L + f * sin_alpha * sigma;
     } else {
       cos_2sigmam = cos_sigma - 2*sin_U1*sin_U2/cos2_alpha;
-      C = f/16 * cos2_alpha * ( 4 + f * (4 - 3*cos2_alpha) );
+      const double C = f/16 * cos2_alpha * ( 4 + f * (4 - 3*cos2_alpha) );
+      lambda = 
+          L + (1-C) * f * sin_alpha * 
+          ( sigma + C * sin_sigma * 
+            ( cos_2sigmam + C * cos_sigma * 
+              ( -1 + 2 * cos_2sigmam*cos_2sigmam ) ) );
     }
-     
-    sigma = 
-        atan2( sin_sigma, cos_sigma );
-    
-    _lambda = lambda;
-    lambda = 
-        L + (1-C) * f * sin_alpha * 
-        ( sigma + C * sin_sigma * 
-          ( cos_2sigmam + C * cos_sigma * 
-            ( -1 + 2 * cos_2sigmam*cos_2sigmam ) ) );
   } while ( fabs(lambda-_lambda) > accuracy && --i );
   
   const double u2 = cos2_alpha * _f;
 
-  const double delta_sigma = 
-      deltasigma_full_precision( B_full_precision(u2),
-                                 sin_sigma,
-                                 cos_sigma,
-                                 cos_2sigmam );
+  const double delta_sigma = deltasigma_full_precision( B_full_precision(u2),
+                                                        sin_sigma,
+                                                        cos_sigma,
+                                                        cos_2sigmam );
   
-  const double atany1 = cos_U2*sin_lambda;
-  const double atanx1 = cos_U1*sin_U2 - sin_U1*cos_U2*cos_lambda;
-  double p1p2 = atan2( atany1 , atanx1 );
+  double p1p2 = atan2( cos_U2*sin_lambda,
+                       cos_U1*sin_U2 - sin_U1*cos_U2*cos_lambda );
 
   if ( p1p2 < 0 ) {
     p1p2 = p1p2 + 2*M_PI;
   }
 
-  const double atany2 = cos_U1*sin_lambda;
-  const double atanx2 = -sin_U1*cos_U2 + cos_U1*sin_U2*cos_lambda;
-
-  // Scary, but the reverse bearing seems to need a "180 degree turn". At
-  // least to be correct with the intervall [0,2*M_PI].
-  double p2p1 = atan2( atany2 , atanx2 ) + M_PI;
-
+  double p2p1 = atan2( cos_U1*sin_lambda,
+                       -sin_U1*cos_U2 + cos_U1*sin_U2*cos_lambda ) 
+      // Scary, but the reverse bearing needs a "180 degree turn". At least to
+      // be correct with the intervall [0,2*M_PI].
+      + M_PI;
+  
   const double s = b * A_full_precision(u2) * ( sigma - delta_sigma );
-
+  
   return vdirection(p1p2,s,p2p1);
 }
 
@@ -306,9 +295,13 @@ double to_deg( const double radians )
 
 
 // ULP compare of doubles.
-inline bool
+bool
 ulpcmp( const double x, const double y, const uint64_t ulpdiff ) {
-  assert( ulpdiff <= 1024*1024 );
+  return ulpcmp_inline( x, y, ulpdiff );
+}
+
+inline bool
+ulpcmp_inline( const double x, const double y, const uint64_t ulpdiff ) {
   typedef uint64_t __attribute__((__may_alias__)) alias_t;
   const uint64_t bits = *(alias_t*)&x - *(alias_t*)&y;
   if ( bits > ulpdiff || -bits > ulpdiff ) {
@@ -330,7 +323,7 @@ A_full_precision( const double u2 ) {
 
 inline double
 B_full_precision( const double u2 ) {
-  return u2/1024 * ( 256 + u2*( -128 + u2*(74 - 47*u2) ) );
+  return 0 + u2/1024  * (  256 + u2*( -128 + u2*( 74 -  47*u2) ) );
 }
 
 inline double
