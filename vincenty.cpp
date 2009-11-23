@@ -26,7 +26,6 @@
 #include <map>
 #include <string>
 
-
 // This shit shall not be visible outside the library, hide all symbols.
 #pragma GCC visibility push(internal)
 const double a  = 6378137.0000;
@@ -42,8 +41,37 @@ double deltasigma_full_precision(
     const double,
     const double,
     const double ) __attribute__ ((pure));
+
+inline void __asm_sincos(const double a, double *sina, double *cosa) {
+  asm ("fsincos;" : "=t" (*cosa), "=u" (*sina) : "0" (a));
+}
+inline double __asm_atan2(double y, double x) {
+  asm ("fpatan;" : "=t" (x) : "0" (x), "u" (y) : "st(1)");
+  return x;
+}
+inline double __asm_sin(double a) {
+  asm ("fsin;" : "=t" (a) : "0" (a));
+  return a;
+}
+inline double __asm_cos(double a) {
+  asm ("fcos;" : "=t" (a) : "0" (a));
+  return a;
+}
+inline double __asm_fabs(double a) {
+  asm ("fabs;" : "=t" (a) : "0" (a));
+  return a;
+}
+
 #pragma GCC visibility pop
 
+#define sincos(a,b,c) __asm_sincos(a,b,c)
+#define atan2(a,b) __asm_atan2(a,b)
+#define sqrt(a) __builtin_sqrt(a)
+#define fabs(a) __builtin_fabs(a)
+
+// Sin and cos makes inverse() slower ... ?
+//#define sin(a) __asm_sin(a)
+//#define cos(a) __asm_cos(a)
 
 namespace vincenty
 {
@@ -61,9 +89,12 @@ vposition direct( const double lat,
   const double tan_U1     = (1-f) * tan(lat);
   const double cos_U1     = 1 / sqrt( (1 + tan_U1 * tan_U1) );
   const double sin_U1     = tan_U1 * cos_U1;
-  const double cos_alpha1 = cos(alpha1);
+
+  double cos_alpha1;
+  double sin_alpha1;
+  sincos(alpha1,&sin_alpha1,&cos_alpha1);
+
   const double sigma1     = atan2( tan_U1, cos_alpha1 );
-  const double sin_alpha1 = sin(alpha1);
   const double sin_alpha  = cos_U1 * sin_alpha1;
   const double cos2_alpha = 1 - sin_alpha*sin_alpha;
   const double u2         = cos2_alpha * _f;
@@ -82,8 +113,8 @@ vposition direct( const double lat,
   // reached. Vincentys algorithm converges fast.
   unsigned int i = 6;
   do {
-    sin_sigma   = sin(sigma);
-    cos_sigma   = cos(sigma);
+    sincos(sigma,&sin_sigma,&cos_sigma);
+
     cos_2sigmam = cos( 2*sigma1 + sigma );
 
     const double delta_sigma = 
@@ -97,7 +128,7 @@ vposition direct( const double lat,
 
   const double lambda = 
       atan2( sin_sigma*sin_alpha1,
-             cos_U1*cos_sigma - sin_U1*sin_sigma*cos_alpha1 );
+                       cos_U1*cos_sigma - sin_U1*sin_sigma*cos_alpha1 );
    
   const double L = 
       lambda - 
@@ -109,8 +140,9 @@ vposition direct( const double lat,
    
   const double tmp =  sin_U1*sin_sigma - cos_U1*cos_sigma*cos_alpha1;
    
-  const double lat2 = atan2( sin_U1*cos_sigma + cos_U1*sin_sigma*cos_alpha1, 
-                             (1-f)*sqrt( sin_alpha*sin_alpha + tmp*tmp ) );
+  const double lat2 = 
+      atan2( sin_U1*cos_sigma + cos_U1*sin_sigma*cos_alpha1, 
+                       (1-f)*sqrt( sin_alpha*sin_alpha + tmp*tmp ) );
   
   /*
     Skip computing the reversed bearing, the returned position does not have a
@@ -182,19 +214,20 @@ vdirection inverse( const double lat1,
   // reached. Vincentys algorithm converges fast.
   unsigned int i = 6;
   do {
-    sin_lambda = sin(lambda);
-    cos_lambda = cos(lambda);
+    sincos(lambda,&sin_lambda,&cos_lambda);
     
-    sin_sigma = sqrt( pow(cos_U2*sin_lambda,2) + 
-                      pow(cos_U1*sin_U2 - sin_U1*cos_U2*cos_lambda,2) );
+    // pow() might be tempting but is slower!
+    sin_sigma = sqrt( cos_U2*sin_lambda * cos_U2*sin_lambda + 
+                      (cos_U1*sin_U2 - sin_U1*cos_U2*cos_lambda) *
+                      (cos_U1*sin_U2 - sin_U1*cos_U2*cos_lambda) );
 
     cos_sigma = sin_U1*sin_U2 + cos_U1*cos_U2*cos_lambda;
 
     sigma = atan2( sin_sigma, cos_sigma );
-     
+
     const double sin_alpha = cos_U1*cos_U2*sin_lambda/sin_sigma;
-     
-    cos2_alpha = 1 - pow(sin_alpha,2);
+
+    cos2_alpha = 1 - sin_alpha * sin_alpha;
 
     _lambda = lambda;
      
@@ -220,14 +253,14 @@ vdirection inverse( const double lat1,
                                                         cos_2sigmam );
   
   double p1p2 = atan2( cos_U2*sin_lambda,
-                       cos_U1*sin_U2 - sin_U1*cos_U2*cos_lambda );
+                                 cos_U1*sin_U2 - sin_U1*cos_U2*cos_lambda );
 
   if ( p1p2 < 0 ) {
     p1p2 = p1p2 + 2*M_PI;
   }
 
   double p2p1 = atan2( cos_U1*sin_lambda,
-                       -sin_U1*cos_U2 + cos_U1*sin_U2*cos_lambda ) 
+                                 -sin_U1*cos_U2 + cos_U1*sin_U2*cos_lambda ) 
       // Scary, but the reverse bearing needs a "180 degree turn". At least to
       // be correct with the intervall [0,2*M_PI].
       + M_PI;

@@ -40,7 +40,7 @@ endif
 
 ifdef opt
 CXXFLAGS += \
-	$(strip -ftree-loop-linear \
+	$(strip -ftree-loop-linear -funsafe-math-optimizations \
 	-ftree-vectorize -ftree-vectorizer-verbose=1 \
 	-fprefetch-loop-arrays -funroll-loops -funswitch-loops)
 endif

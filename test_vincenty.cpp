@@ -474,7 +474,7 @@ TEST_F(VincentyPerformanceTest,PerformanceTest) {
   const unsigned int datasize = sizeof(vposition);
 
   // Use we use 2 million positions?
-  size_t numpositions = 2e6;
+  size_t numpositions = 3e6;
 
   unsigned long memsize;
   if ( numpages > 0 && pagesize > 0 ) {
