@@ -21,7 +21,7 @@ all: libvincenty.so
 
 -include *.d
 
-CXXFLAGS := -pipe -fpic -g -MMD -W -Wall -Wextra -pedantic -Weffc++
+CXXFLAGS := -pipe -fpic -g3 -MMD -W -Wall -Wextra -pedantic -Weffc++
 LDFLAGS := -Wl,--as-needed -Wl,--no-undefined -Wl,-rpath=./ -L./
 
 ifdef tune
