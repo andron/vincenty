@@ -110,8 +110,8 @@ vdirection vposition::operator-( const vposition& rhs ) const
 
 vposition vposition::operator^( const vposition& rhs ) const
 {
-  vdirection d = (*this) - rhs;
-  return direct((*this),d.bearing1,d.distance/2.0);
+  vdirection d = inverse(rhs,(*this));
+  return direct((*this),d.bearing2,d.distance/2.0);
 }
 
 // Geographical direction
