@@ -337,10 +337,11 @@ inline bool
 ulpcmp_inline( const double x, const double y, const uint64_t ulpdiff ) {
   typedef uint64_t __attribute__((__may_alias__)) alias_t;
   const uint64_t bits = *(alias_t*)&x - *(alias_t*)&y;
-  if ( bits > ulpdiff || -bits > ulpdiff ) {
-    return false;
-  } else {
+  const uint64_t nits = *(alias_t*)&y - *(alias_t*)&x;
+  if ( bits < ulpdiff || nits < ulpdiff ) {
     return true;
+  } else {
+    return false;
   }
 }
 

@@ -172,19 +172,23 @@ class vposition
   //! Holds latitude and longitude values.
   v2df_u coords;
       
-  static double degf( const double radians );
-  static double minf( const double radians );
-  static double secf( const double radians );
   static int deg( const double radians );
   static int min( const double radians );
   static int sec( const double radians );
+  static double degf( const double radians );
+  static double minf( const double radians );
+  static double secf( const double radians );
 
   friend std::ostream& operator<<( std::ostream& os, const vposition& rhs );
   friend bool operator==( const vposition& lhs, const vposition& rhs );
 
+  //! Position from "this" in the "rhs" direction.
   vposition operator+( const vdirection& rhs ) const;
+  //! Position from "this" in the opposite direction of "rhs".
   vposition operator-( const vdirection& rhs ) const;
+  //! Direction (vector definition) from rhs to "this".
   vdirection operator-( const vposition& rhs ) const;
+  //! Computes the midpoint between two positions.
   vposition operator^( const vposition& rhs ) const;
 };
 
@@ -428,7 +432,8 @@ double to_deg( const double radians ) __attribute__ ((pure));
 
 
 /*!
- * @brief Compare doubles by "unit in last place", ULPs.
+ * @brief Compare doubles by "unit in last place", ULPs. Default to allow for
+ * a difference of 8-bit positions, a total range of 16-bit positions.
  */
 bool ulpcmp( const double x,
              const double y,
