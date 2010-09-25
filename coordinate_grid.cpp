@@ -245,11 +245,6 @@ operator<<( std::ostream& os, CoordinateGrid& rhs )
  * etc. The distance is \f$r \sqrt{2}\f$.
  */
 void
-CoordinateGrid::_initialize_from_center()
-{
-}
-
-void
 CoordinateGrid::_initialize_news_from_center()
 {
   _grid[0][1] = direct( _grid[1][1], direction::north, _grid_distance );
@@ -261,23 +256,20 @@ CoordinateGrid::_initialize_news_from_center()
 void
 CoordinateGrid::_initialize_corners_from_center()
 {
-  _grid[0][2] = direct( _grid[1][1], direction::northeast, sqrt(2.0)*_grid_distance );
-  _grid[2][2] = direct( _grid[1][1], direction::southeast, sqrt(2.0)*_grid_distance );
-  _grid[2][0] = direct( _grid[1][1], direction::southwest, sqrt(2.0)*_grid_distance );
-  _grid[0][0] = direct( _grid[1][1], direction::northwest, sqrt(2.0)*_grid_distance );
+  static const double sqrt2 = sqrt(2.0);
+  _grid[0][2] = direct( _grid[1][1], direction::northeast, sqrt2*_grid_distance );
+  _grid[2][2] = direct( _grid[1][1], direction::southeast, sqrt2*_grid_distance );
+  _grid[2][0] = direct( _grid[1][1], direction::southwest, sqrt2*_grid_distance );
+  _grid[0][0] = direct( _grid[1][1], direction::northwest, sqrt2*_grid_distance );
 }
 
 void
 CoordinateGrid::_initialize_news_from_corners()
 {
-  const vdirection d1 = inverse(_grid[0][0],_grid[0][2]);
-  const vdirection d2 = inverse(_grid[0][0],_grid[2][0]);
-  const vdirection d3 = inverse(_grid[0][2],_grid[2][2]);
-  const vdirection d4 = inverse(_grid[2][0],_grid[2][2]);
-  _grid[0][1] = direct(_grid[0][0],d1.bearing1,d1.distance/2.0);
-  _grid[1][0] = direct(_grid[0][0],d2.bearing1,d2.distance/2.0);
-  _grid[1][2] = direct(_grid[0][2],d3.bearing1,d3.distance/2.0);
-  _grid[2][1] = direct(_grid[2][0],d4.bearing1,d4.distance/2.0);
+  _grid[0][1] = _grid[0][0] ^ _grid[0][2];
+  _grid[1][0] = _grid[0][0] ^ _grid[2][0];
+  _grid[1][2] = _grid[0][2] ^ _grid[2][2];
+  _grid[2][1] = _grid[2][0] ^ _grid[2][2];
 }
 
 void
@@ -296,7 +288,7 @@ CoordinateGrid::_initialize_center_from_corners()
   /**
    * @todo Getting a center from 4 arbitrary corners are not that easy, and
    * the current solution of averaging the values of 4 positions is NOT
-   * verified by any authority.
+   * verified by any authority to the correct solution.
    */
   _grid[1][1] = vposition( (c1.coords.a[0] +
                             c2.coords.a[0] +
@@ -594,9 +586,11 @@ CoordinateGrid::joinUtil( const unsigned int minimum_grid_point_distance )
 void
 CoordinateGrid::_join()
 {
+  // Create a new grid, half the size (more or less) of the old one.
   const unsigned int new_grid_size = (_grid.size()-1)/2+1;
   coord_grid grid( new_grid_size, coord_vector(new_grid_size, vposition(0,0)) );
 
+  // Loop and copy every other position from old to new.
   for ( unsigned int i=0; i<new_grid_size; ++i ) {
     for ( unsigned int j=0; j<new_grid_size; ++j ) {
       grid[i][j] = _grid[i*2][j*2];
@@ -611,7 +605,7 @@ CoordinateGrid::_join()
 vposition
 CoordinateGrid::operator()( unsigned int i, unsigned int j ) const
 {
-  // Assume we always operate on square sized grids
+  // Assume we always operate on square sized grids.
   const unsigned int N = _grid.size() - 1;
   const unsigned int n = _virtual_grid_size;
 
@@ -624,7 +618,7 @@ CoordinateGrid::operator()( unsigned int i, unsigned int j ) const
    
   // Compute the offset in fractions from the closest corner grid position.
   // {i,j}_0 is the {upper,left} most grid position. {i,j}_1 is just the next
-  // one. d{i,j} is the fractial offset from the real grid position to the
+  // one. d{i,j} is the fractional offset from the real grid position to the
   // virtual grid position.
   const unsigned int i_0 = ( 1 + i * N ) / n;
   const unsigned int i_1 = i_0 + 1;

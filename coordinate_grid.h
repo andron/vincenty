@@ -215,9 +215,6 @@ class CoordinateGrid
       //! Initializes the grid, with a "grid".
       const coord_grid& init_coord_grid );
 
-  //! Initializes all other positions from center.
-  void _initialize_from_center();
-
   //! Initializes n.e.w.s from center.
   void _initialize_news_from_center();
 
