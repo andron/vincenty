@@ -9,7 +9,9 @@ LINK.o = $(LINK.cpp)
 
 # Link and compile
 %.so:
-	$(LINK.cpp) -shared -Wl,-soname=$@.$(INTERFACEVERSION) -o $@.$(LIBVERSION) $^
+	$(LINK.cpp) -shared \
+		-Wl,--version-script,link.ld \
+		-Wl,-soname=$@.$(INTERFACEVERSION) -o $@.$(LIBVERSION) $^
 	/sbin/ldconfig -n ./
 	/bin/ln -sf $@.$(firstword $(subst ., ,$(LIBVERSION))) $@
 %.o:%.cpp

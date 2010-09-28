@@ -1,0 +1,4 @@
+HIDDEN {
+local:
+	__hidden*;
+};
