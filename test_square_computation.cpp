@@ -40,7 +40,7 @@ class SquareTest : public testing::Test
 
 TEST_F(SquareTest, SquareCorners)
 {
-  const double distance = 200000.0;
+  const double distance = 500000.0;
   const double sqrt2    = sqrt(2.0);
 
   std::cout << format::dd;

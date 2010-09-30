@@ -81,7 +81,6 @@ double vposition::secf( const double rad )
   return ( minf(rad) - min(rad) ) * 60;
 }
 
-
 // Operators for vposition.
 bool operator==( const vposition& lhs, const vposition& rhs )
 {

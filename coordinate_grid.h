@@ -84,9 +84,10 @@ class CoordinateGrid
       const unsigned int virtual_grid_size = 5 );
 
   /*! Copy constructor
-   * @param initializer CoordinateGrid for initialization.
    */
-  CoordinateGrid( const CoordinateGrid& initializer );
+  CoordinateGrid(
+      //! CoordinateGrid for initialization.
+      const CoordinateGrid& initializer );
 
   virtual ~CoordinateGrid();
 
@@ -220,9 +221,6 @@ class CoordinateGrid
 
   //! Initializes corners from center.
   void _initialize_corners_from_center();
-
-  //! Initializes n.e.w.s from corners.
-  void _initialize_news_from_corners();
 
   //! Initializes center from corners.
   void _initialize_center_from_corners();

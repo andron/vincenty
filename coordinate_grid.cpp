@@ -24,6 +24,13 @@
 
 using namespace vincenty;
 
+// Hidden anonymous namespace to hide symbols which shall not be published
+// outside the library.
+#pragma GCC visibility push(hidden)
+namespace {
+
+const double sqrt2 = sqrt(2.0);
+
 /**
  * @addtogroup cg_helpers Helper functions in CoordinateGrid.
  * 
@@ -103,10 +110,14 @@ interpolate_position( const vposition& A,
 #endif
 }
 
+}
+#pragma GCC visibility pop
+
 /**@}*/
 
 namespace coordinate {
 
+// I am lazy
 #define DEFAULT_INIT                            \
   _grid(),                                      \
     _virtual_grid_size(0),                      \
@@ -130,17 +141,21 @@ CoordinateGrid::CoordinateGrid( const vincenty::vposition& southwest_position,
   _grid[2][0] = southwest_position;
   _grid[0][2] = northeast_position;
 
-  // Compute middle point and use as center.
+  // Compute middle point and use as center. Starting position is the south
+  // west position.
   const vdirection a = inverse(_grid[2][0],_grid[0][2]);
   _grid[1][1] = direct(_grid[2][0],a.bearing1,a.distance/2.0);
 
-  // UL and LR have the same distance as LL and UR.
-  _grid[0][0] = direct(_grid[1][1],direction::northwest,a.distance);
-  _grid[2][2] = direct(_grid[1][1],direction::southeast,a.distance);
+  // To compute the south east and north west positions we use the newly
+  // computed center position as starting point, and go in respective
+  // direction, half the distance between the user given corners.
+  _grid[0][0] = direct(_grid[1][1],direction::northwest,a.distance/2);
+  _grid[2][2] = direct(_grid[1][1],direction::southeast,a.distance/2);
 
   // Compute _grid_distance to use as base distance for N,E,W,S.
-  _grid_distance = a.distance / ( 2*sqrt(2.0) );
+  _grid_distance = a.distance / ( 2*sqrt2 );
 
+  // Initialize N,E,W,S from the center position.
   _initialize_news_from_center();
 }
 
@@ -154,14 +169,14 @@ CoordinateGrid::CoordinateGrid( const vincenty::vposition& southwest_position,
   coord_vector cv(3,vposition(0,0));
   _grid = coord_grid(3,cv);
 
-  // The four corners.
+  // Setup the four corners.
   _grid[2][0] = southwest_position;
   _grid[0][0] = northwest_position;
   _grid[0][2] = northeast_position;
   _grid[2][2] = southeast_position;
 
-  _initialize_news_from_corners();
   _initialize_center_from_corners();
+  _initialize_news_from_center();
 }
 
 
@@ -256,7 +271,6 @@ CoordinateGrid::_initialize_news_from_center()
 void
 CoordinateGrid::_initialize_corners_from_center()
 {
-  static const double sqrt2 = sqrt(2.0);
   _grid[0][2] = direct( _grid[1][1], direction::northeast, sqrt2*_grid_distance );
   _grid[2][2] = direct( _grid[1][1], direction::southeast, sqrt2*_grid_distance );
   _grid[2][0] = direct( _grid[1][1], direction::southwest, sqrt2*_grid_distance );
@@ -264,42 +278,34 @@ CoordinateGrid::_initialize_corners_from_center()
 }
 
 void
-CoordinateGrid::_initialize_news_from_corners()
-{
-  _grid[0][1] = _grid[0][0] ^ _grid[0][2];
-  _grid[1][0] = _grid[0][0] ^ _grid[2][0];
-  _grid[1][2] = _grid[0][2] ^ _grid[2][2];
-  _grid[2][1] = _grid[2][0] ^ _grid[2][2];
-}
-
-void
 CoordinateGrid::_initialize_center_from_corners()
 {
+  // The two diagonals.
   const vdirection d1 = inverse(_grid[2][0],_grid[0][2]);
   const vdirection d2 = inverse(_grid[0][0],_grid[2][2]);
-  const vdirection d3 = inverse(_grid[0][1],_grid[2][1]);
-  const vdirection d4 = inverse(_grid[1][2],_grid[1][0]);
 
-  vposition c1 = direct(_grid[2][0],d1.bearing1,d1.distance/2.0);
-  vposition c2 = direct(_grid[0][0],d2.bearing1,d2.distance/2.0);
-  vposition c3 = direct(_grid[0][1],d3.bearing1,d3.distance/2.0);
-  vposition c4 = direct(_grid[1][2],d4.bearing1,d4.distance/2.0);
+  // Compute the center as the "average" position of the four corners. There
+  // is no guarantee that the corners forms a perfect square.
+  _grid[1][1] = vposition( (_grid[2][0].coords.a[0] +
+                            _grid[0][2].coords.a[0] +
+                            _grid[0][0].coords.a[0] +
+                            _grid[2][2].coords.a[0] ) / 4.0 ,
+                           (_grid[2][0].coords.a[1] +
+                            _grid[0][2].coords.a[1] +
+                            _grid[0][0].coords.a[1] +
+                            _grid[2][2].coords.a[1] ) / 4.0 );
+  
+  // Compute the grid distance by averaging the distance from the center to
+  // the four corners.
+  const vdirection da = inverse(_grid[1][1],_grid[2][0]);
+  const vdirection db = inverse(_grid[1][1],_grid[0][2]);
+  const vdirection dc = inverse(_grid[1][1],_grid[0][0]);
+  const vdirection dd = inverse(_grid[1][1],_grid[2][2]);
 
-  /**
-   * @todo Getting a center from 4 arbitrary corners are not that easy, and
-   * the current solution of averaging the values of 4 positions is NOT
-   * verified by any authority to the correct solution.
-   */
-  _grid[1][1] = vposition( (c1.coords.a[0] +
-                            c2.coords.a[0] +
-                            c3.coords.a[0] +
-                            c4.coords.a[0]) / 4.0
-                           ,
-                           (c1.coords.a[1] +
-                            c2.coords.a[1] +
-                            c3.coords.a[1] +
-                            c4.coords.a[1]) / 4.0
-                           );
+  _grid_distance = ( da.distance +
+                     db.distance +
+                     dc.distance +
+                     dd.distance ) / (4*sqrt2);
 }
 
 
