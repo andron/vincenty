@@ -33,8 +33,7 @@
 typedef double v2df __attribute__((vector_size(16)));
 typedef float  v4sf __attribute__((vector_size(16)));
 
-/*! @namespace vincenty
- *
+/*! 
  * @brief
  * Namespace with all relevant methods and subclasses for computing vincenty's
  * direct and inverse formulas.
@@ -432,8 +431,10 @@ double to_deg( const double radians ) __attribute__ ((pure));
 
 
 /*!
- * @brief Compare doubles by "unit in last place", ULPs. Default to allow for
- * a difference of 8-bit positions, a total range of 16-bit positions.
+ * @brief Compare doubles by "unit in last place", ULPs.
+ *
+ * Default to allow for a difference of 8-bit positions, a total range of
+ * 16-bit positions.
  */
 bool ulpcmp( const double x,
              const double y,

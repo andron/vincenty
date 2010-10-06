@@ -166,14 +166,14 @@ class CoordinateGrid
    * @return Reference to self.
    */
   CoordinateGrid& joinUtil(
-      //!  Minimum distance between points.
+      //! Minimum distance between points.
       const unsigned int minimum_grid_point_distance );
 
   //! Operator for accessing a grid index within the virtual grid.
 	vincenty::vposition operator()(
-      //! Row counted from up down.
+      //! Row counted from up-down.
       unsigned int i,
-      //! Column from left to right.
+      //! Column counted from left-right.
       unsigned int j ) const;
 
   //! Gets positions via a vector of indexes.
@@ -191,11 +191,13 @@ class CoordinateGrid
   // Real position accessors.
   vincenty::vposition getCenter() const;
 
+  // Gets the four real corners.
   vincenty::vposition getNW() const;
   vincenty::vposition getNE() const;
   vincenty::vposition getSW() const;
   vincenty::vposition getSE() const;
 
+  // Gets the four real sides.
   vincenty::vposition getUL() const;
   vincenty::vposition getUR() const;
   vincenty::vposition getDL() const;
@@ -204,14 +206,12 @@ class CoordinateGrid
 
  private:
 
-  /*! Constructor with vector initialization.
-   */
+  //! Constructor with vector initialization.
   CoordinateGrid(
       //! Initializes the grid, with a "line".
       const coord_vector& init_coord_vector );
    
-  /*! Constructor with grid initialization.
-   */
+  //! Constructor with grid initialization.
   CoordinateGrid(
       //! Initializes the grid, with a "grid".
       const coord_grid& init_coord_grid );
@@ -264,6 +264,6 @@ class CoordinateGrid
   double _virtual_grid_distance;
 };
   
-}
+} // namespace
 
 #endif
