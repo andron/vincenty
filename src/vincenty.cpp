@@ -18,7 +18,7 @@
   <http://www.freebsd.org/copyright/freebsd-license.html>.
 */
 
-#include "vincenty.h"
+#include "vincenty/vincenty.h"
 
 #include <cstdlib>
 #include <iostream>

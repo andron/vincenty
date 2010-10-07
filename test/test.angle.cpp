@@ -1,5 +1,6 @@
+// -*- mode:c++; indent-tabs-mode:nil; -*-
 
-#include "vincenty.h"
+#include "vincenty/vincenty.h"
 
 #include <iostream>
 #include <iomanip>

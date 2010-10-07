@@ -1,4 +1,0 @@
-HIDDEN {
-local:
-	__hidden*;
-};

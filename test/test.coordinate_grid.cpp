@@ -1,6 +1,6 @@
-// -*- mode:c++; tab-width:2; indent-tabs-mode:nil; c-basic-offset:2; -*-
+// -*- mode:c++; indent-tabs-mode:nil; -*-
 
-#include "coordinate_grid.h"
+#include "vincenty/coordinate_grid.h"
 
 #include <cstdlib>
 #include <unistd.h>

@@ -18,9 +18,9 @@
   <http://www.freebsd.org/copyright/freebsd-license.html>.
 */
 
-#include "coordinate_grid.h"
+#include "vincenty/coordinate_grid.h"
 
-#include "vincenty.h"
+#include "vincenty/vincenty.h"
 
 using namespace vincenty;
 

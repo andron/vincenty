@@ -1,4 +1,4 @@
-# -*- mode:makefile; tab-width:3 -*-
+# -*- mode:makefile; tab-width:2 -*-
 
 .SECONDEXPANSION:
 
@@ -8,22 +8,19 @@
 LINK.o = $(LINK.cpp)
 
 # Link and compile
+vpath %.o   src test example
+vpath %.cpp src test example
+%.o:%.cpp
+	$(COMPILE.cpp) $< $(OUTPUT_OPTION)
 %.so:
 	$(LINK.cpp) -shared \
-		-Wl,--version-script,link.ld \
 		-Wl,-soname=$@.$(INTERFACEVERSION) -o $@.$(LIBVERSION) $^
 	/sbin/ldconfig -n ./
 	/bin/ln -sf $@.$(firstword $(subst ., ,$(LIBVERSION))) $@
-%.o:%.cpp
-	$(COMPILE.cpp) $< $(OUTPUT_OPTION)
 %:%.o
 	$(LINK.cpp) $^ $(OUTPUT_OPTION)
 
-all: libvincenty.so
-
--include *.d
-
-CXXFLAGS := -pipe -fpic -g3 -MMD -W -Wall -Wextra -pedantic -Weffc++
+CXXFLAGS := -pipe -fpic -g3 -MMD -W -Wall -Wextra -pedantic -Weffc++ -I./include
 LDFLAGS := -Wl,--as-needed -Wl,--no-undefined -Wl,-rpath=./ -L./
 
 ifdef tune
@@ -36,10 +33,6 @@ CXXFLAGS += -O2 -mtune=generic
 endif
 endif
 
-ifdef unopt
-CXXFLAGS += -mno-sse2 -mno-sse3
-endif
-
 ifdef opt
 CXXFLAGS += \
 	$(strip -ftree-loop-linear -funsafe-math-optimizations \
@@ -47,40 +40,38 @@ CXXFLAGS += \
 	-fprefetch-loop-arrays -funroll-loops -funswitch-loops)
 endif
 
-libvincenty.so: LDFLAGS := -Wl,--no-undefined
+all: libvincenty.so
+
 libvincenty.so: LIBVERSION := 1.0.0
 libvincenty.so: INTERFACEVERSION := $(firstword $(subst ., ,$(LIBVERSION)))
 libvincenty.so: vincenty.o vincenty_geotypes.o vincenty_ostream.o coordinate_grid.o
 
-test: test_vincenty test_coordinate_grid test_angle_correction test_square_computation
+LDFLAGS_TEST := -lgtest_main -lvincenty
 
-test_vincenty: test_vincenty.o libvincenty.so
-test_vincenty: LDFLAGS += -lgtest_main
+TARGET_TEST := test.vincenty test.coordinate_grid test.angle test.square
+test: all $(TARGET_TEST)
+$(TARGET_TEST): libvincenty.so
+$(TARGET_TEST): LDFLAGS += $(LDFLAGS_TEST)
 
-test_coordinate_grid: test_coordinate_grid.o libvincenty.so
-test_coordinate_grid: LDFLAGS += -lgtest_main
-
-test_angle_correction: test_angle_correction.o libvincenty.so
-test_angle_correction: LDFLAGS += -lgtest_main
-
-test_square_computation: test_square_computation.o libvincenty.so
-test_square_computation: LDFLAGS += -lgtest_main
-
-example: example_coordinate_grid
-example_coordinate_grid: LDFLAGS := -Wl,--as-needed -Wl,-rpath=./ -L./
-example_coordinate_grid: example_coordinate_grid.o libvincenty.so
+example: example.coordinate_grid
+example.coordinate_grid: LDFLAGS := -Wl,--as-needed -Wl,-rpath=./ -L./
+example.coordinate_grid: example.coordinate_grid.o libvincenty.so
 
 check: test
-	./test_vincenty
-	./test_coordinate_grid
+	./test.vincenty
+	./test.coordinate_grid
 
 distclean:
-	-rm -f  *.so* *.o *~ *.d \
-	test_vincenty \
-	test_coordinate_grid \
-	test_angle_correction \
-	test_square_computation \
-	example_coordinate_grid
+	@echo $@...
+	@-find -type f -name "*\.o" -delete
+	@-rm -f  *.so* *.o *~ *.d \
+	test.vincenty \
+	test.coordinate_grid \
+	test.angle \
+	test.square \
+	example.coordinate_grid
 
 doc:
 	doxygen
+
+.PHONY: all test check distclean doc Makefile
