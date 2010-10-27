@@ -448,4 +448,5 @@ bool ulpcmp_inline( const double x,
                     const uint64_t ulpdiff = 8 ) __attribute__ ((pure));
 
 } // namespace end
+
 #endif

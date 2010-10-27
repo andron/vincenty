@@ -658,4 +658,4 @@ CoordinateGrid::getPositions( index_vector iv ) const
   return cv;
 }
 
-}
+} // namespace

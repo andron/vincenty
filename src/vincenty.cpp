@@ -27,7 +27,7 @@
 #include <string>
 
 // This shit shall not be visible outside the library, hide all symbols.
-#pragma GCC visibility push(internal)
+#pragma GCC visibility push(hidden)
 const double a  = 6378137.0000;
 const double b  = 6356752.3142;
 const double f  = (a-b)/a;
@@ -61,7 +61,6 @@ inline double __asm_fabs(double a) {
   asm ("fabs;" : "=t" (a) : "0" (a));
   return a;
 }
-
 #pragma GCC visibility pop
 
 #define sincos(a,b,c) __asm_sincos(a,b,c)
@@ -212,7 +211,7 @@ vdirection inverse( const double lat1,
 
   // Prevent loop deadlock. Average loop count is 2-4 before accuracy is
   // reached. Vincentys algorithm converges fast.
-  unsigned int i = 6;
+  unsigned int i = 8;
   do {
     sincos(lambda,&sin_lambda,&cos_lambda);
     
