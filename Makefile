@@ -46,7 +46,7 @@ libvincenty.so: LIBVERSION := 1.0.0
 libvincenty.so: INTERFACEVERSION := $(firstword $(subst ., ,$(LIBVERSION)))
 libvincenty.so: vincenty.o vincenty_geotypes.o vincenty_ostream.o coordinate_grid.o
 
-LDFLAGS_TEST := -lgtest_main -lvincenty
+LDFLAGS_TEST := -lgtest_main -pthread -lvincenty
 
 TARGET_TEST := test.vincenty test.coordinate_grid test.angle test.square
 test: all $(TARGET_TEST)
