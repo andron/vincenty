@@ -473,8 +473,8 @@ TEST_F(VincentyPerformanceTest,PerformanceTest) {
   // Approx amount of memory needed.
   const unsigned int datasize = sizeof(vposition);
 
-  // Use we use 2 million positions?
-  size_t numpositions = 3e6;
+  // Large amount of positions?
+  size_t numpositions = 1e5;
 
   unsigned long memsize;
   if ( numpages > 0 && pagesize > 0 ) {
