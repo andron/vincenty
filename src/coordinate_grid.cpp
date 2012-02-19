@@ -280,10 +280,6 @@ CoordinateGrid::_initialize_corners_from_center()
 void
 CoordinateGrid::_initialize_center_from_corners()
 {
-  // The two diagonals.
-  const vdirection d1 = inverse(_grid[2][0],_grid[0][2]);
-  const vdirection d2 = inverse(_grid[0][0],_grid[2][2]);
-
   // Compute the center as the "average" position of the four corners. There
   // is no guarantee that the corners forms a perfect square.
   _grid[1][1] = vposition( (_grid[2][0].coords.a[0] +
