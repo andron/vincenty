@@ -71,6 +71,8 @@ distclean:
 	test.square \
 	example.coordinate_grid
 
+test.angle: LDFLAGS_TEST := -pthread -lvincenty -lgtest
+
 doc:
 	doxygen
 
