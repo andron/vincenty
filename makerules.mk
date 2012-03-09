@@ -9,8 +9,7 @@ REQUIRES :=
 
 TARGETS := libvincenty.so
 
-_CXXFLAGS := -flto -fipa-pta
-_LDFLAGS  := -flto
+_CXXFLAGS := -march=native
 
 libvincenty.so_SRCS := $(call getsource,src,*.cpp)
 
