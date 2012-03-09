@@ -56,7 +56,7 @@ class VincentyBasicTest : public testing::Test
   {
   }
 
-  virtual ~VincentyBasicTest() 
+  virtual ~VincentyBasicTest()
   {
     // Nothing to remove.
   }
@@ -71,13 +71,37 @@ TEST_F(VincentyBasicTest, ConvertersDegreesRadians) {
   EXPECT_FLOAT_EQ(-1.36135681655558, to_rad(-78.0));
   EXPECT_FLOAT_EQ( 0.0, to_rad( 0.0));
   EXPECT_FLOAT_EQ(-0.0, to_rad(-0.0));
-  
+
   EXPECT_FLOAT_EQ(180.0, to_deg(3.14159265358979));
   EXPECT_FLOAT_EQ( 90.0, to_deg(1.57079632679490));
   EXPECT_FLOAT_EQ( 78.0, to_deg(1.36135681655558));
   EXPECT_FLOAT_EQ(-56.0, to_deg( to_rad(-56.0) ));
   EXPECT_FLOAT_EQ(  0.0, to_deg( 0.0));
   EXPECT_FLOAT_EQ( -0.0, to_deg(-0.0));
+}
+
+
+TEST_F(VincentyBasicTest, VpositionDegreeRadianConverter) {
+
+  for (int i=0; i<5; ++i) {
+    const double val = 10*i;
+    int deg = vposition::deg(to_rad(val));
+    int min = vposition::min(to_rad(val));
+    int sec = vposition::sec(to_rad(val));
+    EXPECT_EQ(int(val+0.5),deg);
+    EXPECT_EQ(0           ,min);
+    EXPECT_EQ(0           ,sec);
+  }
+
+  for (int i=0; i<5; ++i) {
+    const double val = 10*i + 0.5;
+    int deg = vposition::deg(to_rad(val));
+    int min = vposition::min(to_rad(val));
+    int sec = vposition::sec(to_rad(val));
+    EXPECT_EQ(int(val),deg);
+    EXPECT_EQ(30      ,min);
+    EXPECT_EQ(0       ,sec);
+  }
 }
 
 
@@ -97,6 +121,110 @@ TEST_F(VincentyBasicTest, InitializingPolesIsOk) {
   EXPECT_FLOAT_EQ( to_rad(  0.0), northpole.coords.a[1]);
   EXPECT_FLOAT_EQ( to_rad(-90.0), southpole.coords.a[0]);
   EXPECT_FLOAT_EQ( to_rad(  0.0), southpole.coords.a[1]);
+}
+
+
+// Default ctor
+TEST_F(VincentyBasicTest, VdirectionDefaultConstructor) {
+  const vdirection d;
+  EXPECT_FLOAT_EQ(0.0, d.bearing1)
+      << "Default vdirection ctor bearing1 shall be 0.0!";
+  EXPECT_FLOAT_EQ(0.0, d.bearing2)
+      << "Default vdirection ctor bearing2 shall be 0.0!";
+  EXPECT_FLOAT_EQ(0.0, d.distance)
+      << "Default vdirection ctor distance shall be 0.0!";
+}
+
+
+// Default ctor
+TEST_F(VincentyBasicTest, VpositionDefaultConstructor) {
+  const vposition p;
+  EXPECT_FLOAT_EQ(0.0, p.coords.a[0])
+      << "Default vposition ctor coord shall be 0.0!";
+  EXPECT_FLOAT_EQ(0.0, p.coords.a[1])
+      << "Default vposition ctor coord shall be 0.0!";
+}
+
+
+// Test movement of zero meters for direct().
+TEST_F(VincentyBasicTest, ZeroDistance) {
+  // Travel zero distance.
+  const vposition a = direct(p1,  0.0, 0.0);
+  const vposition b = direct(p1, 30.0, 0.0);
+  const vposition c = direct(p1, 90.0, 0.0);
+
+  // Expect the position to be exactly the same.
+  EXPECT_FLOAT_EQ(p1.coords.a[0], a.coords.a[0]) << "Traveling 0.0m must not change position!";
+  EXPECT_FLOAT_EQ(p1.coords.a[1], a.coords.a[1]) << "Traveling 0.0m must not change position!";
+  EXPECT_FLOAT_EQ(p1.coords.a[0], b.coords.a[0]) << "Traveling 0.0m must not change position!";
+  EXPECT_FLOAT_EQ(p1.coords.a[1], b.coords.a[1]) << "Traveling 0.0m must not change position!";
+  EXPECT_FLOAT_EQ(p1.coords.a[0], c.coords.a[0]) << "Traveling 0.0m must not change position!";
+  EXPECT_FLOAT_EQ(p1.coords.a[1], c.coords.a[1]) << "Traveling 0.0m must not change position!";
+}
+
+
+// Compare identical positions (testing operator==)
+TEST_F(VincentyBasicTest, IdenticalPositionsCompareOperator) {
+  EXPECT_TRUE(northpole == northpole)
+      << "Compare operator must return true for identical positions!";
+
+  EXPECT_TRUE(p1 == p1)
+      << "Compare operator must return true for identical positions!";
+
+  EXPECT_FALSE(northpole == southpole)
+      << "Compare operator must NOT return true for different positions!";
+
+  EXPECT_FALSE(p1 == p2)
+      << "Compare operator must NOT return true for different positions!";
+}
+
+
+// Compare identical positions (testing operator==)
+TEST_F(VincentyBasicTest, IdenticalDirectionsCompareOperator) {
+
+  const vdirection d1 = inverse(northpole, southpole);
+  const vdirection d2 = inverse(southpole, northpole);
+  const vdirection d3 = inverse(sweden, p1);
+
+  const std::string error_true = "Compare operator must return true for identical directions!";
+  const std::string error_false = "Compare operator must NOT return true for different directions!";
+
+  EXPECT_TRUE(d1 == d1) << error_true;
+  EXPECT_TRUE(d2 == d2) << error_true;
+  EXPECT_TRUE(d3 == d3) << error_true;
+  EXPECT_TRUE(p1 == p1) << error_true;
+  EXPECT_TRUE(dir025_15000 == dir025_15000) << error_true;
+  EXPECT_TRUE(dir030_90000 == dir030_90000) << error_true;
+
+  EXPECT_FALSE(d1 == d2) << error_false;
+  EXPECT_FALSE(d2 == d3) << error_false;
+  EXPECT_FALSE(d3 == d1) << error_false;
+  EXPECT_FALSE(p1 == p2) << error_false;
+  EXPECT_FALSE(dir025_15000 == dir030_90000) << error_false;
+
+  const vdirection x1(0.0,10,0.0);
+  const vdirection x2(1.0,10,1.0);
+  EXPECT_FALSE(x1 == x2) << error_false;
+}
+
+
+TEST_F(VincentyBasicTest, ShortenOperator) {
+  const vdirection d1(10,10);
+  const vdirection d2 = d1/2;
+  EXPECT_FLOAT_EQ(d1.distance, d2.distance*2.0)
+      << "Divide operator should change the distance!";
+  EXPECT_FLOAT_EQ(d1.bearing1, d2.bearing1)
+      << "Divide operator must NOT change bearing!";
+}
+
+
+TEST_F(VincentyBasicTest, LengthenOperator) {
+  const vdirection d1(10,10);
+  const vdirection d2 = d1*2;
+  EXPECT_FLOAT_EQ(d1.distance, d2.distance/2.0)
+      << "Multiply operator should change the distance!";
+  EXPECT_FLOAT_EQ(d1.bearing1, d2.bearing1)
+      << "Multiply operator must NOT change bearing!";
 }
 
 
@@ -204,10 +332,10 @@ TEST_F(VincentyBasicTest, OppositeDirectionNEWSResultsInDoubleDistance) {
     const double lon1 =   M_PI * ( drand48() - 0.5 );
     vposition p(lat1,lon1);
     for ( unsigned int d=1; d<9; ++d ) {
-      for ( unsigned int i=1; i<9; ++i ) { 
+      for ( unsigned int i=1; i<9; ++i ) {
         // North, south, east and west.
         vposition pN, pS, pE, pW;
-        
+
         pN = direct(p,direction::n,dist*d);
         pS = direct(p,direction::s,dist*d);
         pE = direct(p,direction::e,dist*d);
@@ -215,7 +343,7 @@ TEST_F(VincentyBasicTest, OppositeDirectionNEWSResultsInDoubleDistance) {
 
         vdirection dNS = inverse(pN,pS);
         vdirection dEW = inverse(pE,pW);
-        
+
         EXPECT_FLOAT_EQ(2*dist*d,dNS.distance)
             << "Opposite direction did not result in double distance!";
         EXPECT_FLOAT_EQ(2*dist*d,dEW.distance)
@@ -245,7 +373,7 @@ TEST_F(VincentyBasicTest, AritmeticOperatorsAreOk) {
   // ostream output is equal we assume the positions are equal, or at least
   // equal enough.
   std::stringstream str1,str2,str3,str4;
- 
+
   str1.precision(5);
   str2.precision(str1.precision());
   str3.precision(str1.precision());
@@ -268,7 +396,7 @@ TEST_F(VincentyBasicTest, AritmeticOperatorsAreOk) {
  * Testing class for more specific tests, real distances and verification to
  * correct reference points etc.
  */
-class VincentyVerificationTest : public testing::Test 
+class VincentyVerificationTest : public testing::Test
 {
  protected:
 
@@ -389,7 +517,7 @@ TEST_F(VincentyVerificationTest, DistancesAreSane) {
       // must be half of the largest circle which encloses the earth.
       EXPECT_LT( dir1.distance, 6378137*M_PI )
           << "No distance can be larger then half a sphere arc";
-      
+
       // Expect the reverse distance to be the same. (Already tested prior to
       // this but not with real positions.
       EXPECT_FLOAT_EQ( dir1.distance, dir2.distance );
@@ -425,7 +553,7 @@ TEST_F(VincentyVerificationTest, MiddlePositionReciprocity) {
       << "Bearing A->B is not equal to *reverse* bearing B->A!";
   EXPECT_FLOAT_EQ(d2.bearing1,d1.bearing2)
       << "Bearing B->A is not equal to *reverse* bearing A->B!";
-  
+
   // Expect all positions to be the same.
   EXPECT_FLOAT_EQ(p_d1_b1.coords.a[0],p_d1_b2.coords.a[0]);
   EXPECT_FLOAT_EQ(p_d1_b1.coords.a[1],p_d1_b2.coords.a[1]);
@@ -470,7 +598,7 @@ TEST_F(VincentyVerificationTest, InverseReciprocity) {
 /**
  * Testing class for pure performance estimates.
  */
-class VincentyPerformanceTest : public testing::Test 
+class VincentyPerformanceTest : public testing::Test
 {
  protected:
   vposition northpole;
@@ -490,7 +618,7 @@ class VincentyPerformanceTest : public testing::Test
   virtual void SetUp() {
     // Setup things, which might throw.
   }
-  
+
   virtual void TearDown() {
     // Remove things setup by SetUp.
   }
@@ -557,12 +685,12 @@ TEST_F(VincentyPerformanceTest,PerformanceTest) {
     avg_distance = ( avg_distance * i + dir.distance ) / ( i + 1 );
   }
   gettimeofday( &tm_stop, 0 );
-  
+
   const double inv_seconds =
       ( ( tm_stop.tv_sec  - tm_start.tv_sec  ) +
         ( tm_stop.tv_usec - tm_start.tv_usec ) / 1.e6 );
 
-  
+
   const double dirs[2] = {direction::east,direction::west};
 
   // Compute a "jump" and use the vposition.
@@ -597,10 +725,12 @@ TEST_F(VincentyPerformanceTest,PerformanceTest) {
       << " -- Avg lat:       " << std::setprecision(8) << avg_latitude << std::endl
       << " -- Avg lon:       " << std::setprecision(8) << avg_longitude << std::endl;
 
-  EXPECT_LT(750 ,inv_performance)
-      << "Performance is suspiciously low! Check accuracy or other anomalies."; 
-  EXPECT_LT(1200,dir_performance)
-      << "Performance is suspiciously low! Check accuracy or other anomalies."; 
+  // This is highly machine dependent and should perhaps not be performed as a
+  // test like this.
+  //EXPECT_LT(750 ,inv_performance)
+  //    << "Performance is suspiciously low! Check accuracy or other anomalies.";
+  //EXPECT_LT(1200,dir_performance)
+  //    << "Performance is suspiciously low! Check accuracy or other anomalies.";
 }
 
 } // namespace end
