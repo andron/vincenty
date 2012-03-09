@@ -59,7 +59,7 @@ int vposition::min( const double rad )
 //! Extracts integer seconds from float radian.
 int vposition::sec( const double rad )
 {
-  return int( ( minf(rad) - min(rad) ) * 60 );
+  return int( ( minf(rad) - min(rad) ) * 60 + 0.5 );
 }
 
 
