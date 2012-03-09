@@ -426,7 +426,7 @@ TEST_F(VincentyVerificationTest, MiddlePositionReciprocity) {
   EXPECT_FLOAT_EQ(d2.bearing1,d1.bearing2)
       << "Bearing B->A is not equal to *reverse* bearing A->B!";
   
-  // The all positions to be the same.
+  // Expect all positions to be the same.
   EXPECT_FLOAT_EQ(p_d1_b1.coords.a[0],p_d1_b2.coords.a[0]);
   EXPECT_FLOAT_EQ(p_d1_b1.coords.a[1],p_d1_b2.coords.a[1]);
   EXPECT_FLOAT_EQ(p_d1_b1.coords.a[0],p_d2_b1.coords.a[0]);
@@ -434,6 +434,38 @@ TEST_F(VincentyVerificationTest, MiddlePositionReciprocity) {
   EXPECT_FLOAT_EQ(p_d2_b1.coords.a[0],p_d2_b2.coords.a[0]);
   EXPECT_FLOAT_EQ(p_d2_b1.coords.a[1],p_d2_b2.coords.a[1]);
 }
+
+TEST_F(VincentyVerificationTest, InverseReciprocity) {
+  // From A to B
+  const vdirection us = inverse(uddevalla,stockholm);
+  const vdirection su = inverse(stockholm,uddevalla);
+  const vdirection uk = inverse(uddevalla,karlstad);
+  const vdirection ku = inverse(karlstad,uddevalla);
+  const vdirection sk = inverse(stockholm,karlstad);
+  const vdirection ks = inverse(karlstad,stockholm);
+
+  // Expect the forward bearing to be identical to the reverse bearing when
+  // computing A->B and B->A. The same goes for the reverse bearing.
+  EXPECT_FLOAT_EQ(us.bearing1,su.bearing2)
+      << "Bearing A->B is not equal to *reverse* bearing B->A!";
+  EXPECT_FLOAT_EQ(su.bearing1,us.bearing2)
+      << "Bearing A->B is not equal to *reverse* bearing B->A!";
+  EXPECT_FLOAT_EQ(uk.bearing1,ku.bearing2)
+      << "Bearing A->B is not equal to *reverse* bearing B->A!";
+  EXPECT_FLOAT_EQ(ku.bearing1,uk.bearing2)
+      << "Bearing A->B is not equal to *reverse* bearing B->A!";
+  EXPECT_FLOAT_EQ(sk.bearing1,ks.bearing2)
+      << "Bearing A->B is not equal to *reverse* bearing B->A!";
+  EXPECT_FLOAT_EQ(ks.bearing1,sk.bearing2)
+      << "Bearing A->B is not equal to *reverse* bearing B->A!";
+
+  // Expect all distances to be the same.
+  EXPECT_FLOAT_EQ(us.distance,su.distance) << "Distance A->B is not the same as B->A!";
+  EXPECT_FLOAT_EQ(uk.distance,ku.distance) << "Distance A->B is not the same as B->A!";
+  EXPECT_FLOAT_EQ(sk.distance,ks.distance) << "Distance A->B is not the same as B->A!";
+}
+
+
 
 /**
  * Testing class for pure performance estimates.

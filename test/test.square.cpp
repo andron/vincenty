@@ -82,11 +82,3 @@ TEST_F(SquareTest, SquareCorners)
 }
 
 } // namespace end
-
-
-//int
-//main(int argc, char** argv)
-//{
-//  testing::InitGoogleTest(&argc, argv);
-//  return RUN_ALL_TESTS();
-//}
