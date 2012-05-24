@@ -168,6 +168,10 @@ class vposition
   vposition();
   vposition( double lat, double lon );
 
+  //! Accessors
+  double latitude() const;
+  double longitude() const;
+
   //! Holds latitude and longitude values.
   v2df_u coords;
       

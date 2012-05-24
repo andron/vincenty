@@ -43,6 +43,17 @@ vposition::vposition( double _lat, double _lon )
   coords.a[1] = _lon;
 }
 
+//! Accessor for latitude component.
+double vposition::latitude() const
+{
+  return coords.a[0];
+}
+
+//! Accessor for longitude component.
+double vposition::longitude() const
+{
+  return coords.a[1];
+}
 
 //! Integer degrees from float radian.
 int vposition::deg( const double rad )
