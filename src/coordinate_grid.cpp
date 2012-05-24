@@ -1,18 +1,18 @@
 // -*- mode:c++; tab-width:2; indent-tabs-mode:nil; c-basic-offset:2; -*-
 
 /*
-  Copyright (C) 2009, Anders Ronnbrant - andro@lysator.liu.se
+  Copyright (C) 2009, 2010, 2011, 2012, Anders Ronnbrant - andro@lysator.liu.se
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
-  modification, are Permitted provided that the following conditions are met:
+  modification, are permitted provided that the following conditions are met:
 
   * Redistributions of source code must retain the above copyright notice,
-  this list of conditions and the following disclaimer.
+    this list of conditions and the following disclaimer.
 
   * Redistributions in binary form must reproduce the above copyright notice,
-  this list of conditions and the following disclaimer in the documentation
-  and/or other materials provided with the distribution.
+    this list of conditions and the following disclaimer in the documentation
+    and/or other materials provided with the distribution.
 
   You should have received a copy of the FreeBSD license, if not see:
   <http://www.freebsd.org/copyright/freebsd-license.html>.

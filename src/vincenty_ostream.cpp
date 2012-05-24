@@ -1,7 +1,7 @@
 // -*- mode:c++; tab-width:2; indent-tabs-mode:nil; c-basic-offset:2; -*-
 
 /*
-  Copyright (C) 2009, Anders Ronnbrant - andro@lysator.liu.se
+  Copyright (C) 2009, 2010, 2011, 2012, Anders Ronnbrant - andro@lysator.liu.se
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
