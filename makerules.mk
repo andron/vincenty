@@ -8,10 +8,8 @@ RELEASE  := 1
 REQUIRES :=
 $(call setup_requires)
 
-TARGETS := libvincenty.so
-
 _CXXFLAGS := -march=native
 
-libvincenty.so_SRCS := $(call getsource,src,*.cpp)
+TARGETS := libvincenty.so
 
 include $(FOOTER)
