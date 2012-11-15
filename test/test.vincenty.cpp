@@ -330,16 +330,16 @@ TEST_F(VincentyBasicTest, OppositeDirectionNEWSResultsInDoubleDistance) {
   for ( unsigned int p=1; p<loops; ++p ) {
     const double lat1 = 2*M_PI * ( drand48() - 0.5 );
     const double lon1 =   M_PI * ( drand48() - 0.5 );
-    vposition p(lat1,lon1);
+    vposition pos(lat1,lon1);
     for ( unsigned int d=1; d<9; ++d ) {
       for ( unsigned int i=1; i<9; ++i ) {
         // North, south, east and west.
         vposition pN, pS, pE, pW;
 
-        pN = direct(p,direction::n,dist*d);
-        pS = direct(p,direction::s,dist*d);
-        pE = direct(p,direction::e,dist*d);
-        pW = direct(p,direction::w,dist*d);
+        pN = direct(pos,direction::n,dist*d);
+        pS = direct(pos,direction::s,dist*d);
+        pE = direct(pos,direction::e,dist*d);
+        pW = direct(pos,direction::w,dist*d);
 
         vdirection dNS = inverse(pN,pS);
         vdirection dEW = inverse(pE,pW);
