@@ -242,7 +242,6 @@ typedef std::vector<vdirection> vdirection_vector;
 /**
  * @defgroup vincenty_functions Vincenty functions
  * @brief Vincenty's two main functions, the inverse and direct formula.
- * @detail <Details here>
  */
 
 //!@{
