@@ -6,6 +6,7 @@ NAME     := vincenty
 VERSION  := 1.0.0
 RELEASE  := 1
 REQUIRES :=
+$(call setup_requires)
 
 TARGETS := libvincenty.so
 

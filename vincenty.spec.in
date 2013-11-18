@@ -1,0 +1,51 @@
+Summary: Vincenty coordinate library
+Name: @name@
+Version: @version@
+Release: @release@
+License: GPLv3
+Group: none
+URL: none
+Source0: %{name}-%{version}.tar.gz
+BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
+
+%description
+Vincenty coordinate library
+
+
+%package devel
+Summary: Development package for %{name}
+
+%description devel
+Development package for %{name}
+
+
+%prep
+%setup -q
+
+%build
+%{__make}
+
+%install
+rm -rf $RPM_BUILD_ROOT
+%{makeinstall}
+
+%clean
+rm -rf $RPM_BUILD_ROOT
+
+
+%files
+%defattr(-,root,root,-)
+%doc README.md
+%doc LICENSE
+%{_libdir}/*.so.*
+
+%files devel
+%defattr(644,root,root,2755)
+%doc README.md
+%doc LICENSE
+%{_includedir}/*
+%{_libdir}/*.a
+%{_libdir}/*.so
+
+
+%changelog
