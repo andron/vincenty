@@ -5,8 +5,8 @@ include $(HEADER)
 NAME     := vincenty
 VERSION  := 1.0.0
 RELEASE  := 1
-REQUIRES :=
-$(call setup_requires)
+REQUIRES := # Nothing
+$(call setup)
 
 _CXXFLAGS := -march=native
 
