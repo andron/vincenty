@@ -322,7 +322,7 @@ double to_rad( const double degrees )
 
 double to_deg( const double radians )
 {
-  return ( radians * 180.0 ) / M_PI;
+  return ( radians / M_PI ) * 180.0;
 }
 
 
