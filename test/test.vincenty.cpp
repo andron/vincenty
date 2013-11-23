@@ -65,19 +65,36 @@ class VincentyBasicTest : public testing::Test
 
 // Test converts from and to degrees and radians.
 TEST_F(VincentyBasicTest, ConvertersDegreesRadians) {
-  EXPECT_FLOAT_EQ( 3.14159265358979, to_rad(180.0));
-  EXPECT_FLOAT_EQ( 1.57079632679490, to_rad( 90.0));
-  EXPECT_FLOAT_EQ( 1.36135681655558, to_rad( 78.0));
-  EXPECT_FLOAT_EQ(-1.36135681655558, to_rad(-78.0));
+  EXPECT_FLOAT_EQ( 3.14159265358979L, to_rad(180.0));
+  EXPECT_FLOAT_EQ( 1.57079632679490L, to_rad( 90.0));
+  EXPECT_FLOAT_EQ( 1.36135681655558L, to_rad( 78.0));
+  EXPECT_FLOAT_EQ(-1.36135681655558L, to_rad(-78.0));
   EXPECT_FLOAT_EQ( 0.0, to_rad( 0.0));
   EXPECT_FLOAT_EQ(-0.0, to_rad(-0.0));
 
-  EXPECT_FLOAT_EQ(180.0, to_deg(3.14159265358979));
-  EXPECT_FLOAT_EQ( 90.0, to_deg(1.57079632679490));
-  EXPECT_FLOAT_EQ( 78.0, to_deg(1.36135681655558));
+  EXPECT_FLOAT_EQ(180.0, to_deg(3.14159265358979L));
+  EXPECT_FLOAT_EQ( 90.0, to_deg(1.57079632679490L));
+  EXPECT_FLOAT_EQ( 78.0, to_deg(1.36135681655558L));
   EXPECT_FLOAT_EQ(-56.0, to_deg( to_rad(-56.0) ));
   EXPECT_FLOAT_EQ(  0.0, to_deg( 0.0));
   EXPECT_FLOAT_EQ( -0.0, to_deg(-0.0));
+}
+
+
+TEST_F(VincentyBasicTest, ConvertersDegreesRadiansReciproc)
+{
+  for (int i=0; i<10; ++i) {
+    double t1 = i+1;
+    double t2 = i+5;
+    double t3 = i*5;
+    double t4 = i*10;
+    double t5 = i*30;
+    EXPECT_FLOAT_EQ(t1, to_deg(to_rad(t1)));
+    EXPECT_FLOAT_EQ(t2, to_deg(to_rad(t2)));
+    EXPECT_FLOAT_EQ(t3, to_deg(to_rad(t3)));
+    EXPECT_FLOAT_EQ(t4, to_deg(to_rad(t4)));
+    EXPECT_FLOAT_EQ(t5, to_deg(to_rad(t5)));
+  }
 }
 
 
@@ -88,9 +105,12 @@ TEST_F(VincentyBasicTest, VpositionDegreeRadianConverter) {
     int deg = vposition::deg(to_rad(val));
     int min = vposition::min(to_rad(val));
     int sec = vposition::sec(to_rad(val));
-    EXPECT_EQ(int(val+0.5),deg);
-    EXPECT_EQ(0           ,min);
-    EXPECT_EQ(0           ,sec);
+    EXPECT_EQ(val, deg)
+        << "Value: " << val << " Index: " << i;
+    EXPECT_EQ(0,   min)
+        << "Value: " << val << " Index: " << i;
+    EXPECT_EQ(0,   sec)
+        << "Value: " << val << " Index: " << i;
   }
 
   for (int i=0; i<5; ++i) {
@@ -98,9 +118,25 @@ TEST_F(VincentyBasicTest, VpositionDegreeRadianConverter) {
     int deg = vposition::deg(to_rad(val));
     int min = vposition::min(to_rad(val));
     int sec = vposition::sec(to_rad(val));
-    EXPECT_EQ(int(val),deg);
-    EXPECT_EQ(30      ,min);
-    EXPECT_EQ(0       ,sec);
+    EXPECT_EQ(int(val),deg)
+        << "Value: " << val << " Index: " << i;
+    EXPECT_EQ(30      ,min)
+        << "Value: " << val << " Index: " << i;
+    EXPECT_EQ(0       ,sec)
+        << "Value: " << val << " Index: " << i;
+  }
+
+  for (int i=0; i<5; ++i) {
+    const double val = 10*i + 1;
+    int deg = vposition::deg(to_rad(val));
+    int min = vposition::min(to_rad(val));
+    int sec = vposition::sec(to_rad(val));
+    EXPECT_EQ(int(val),deg)
+        << "Value: " << val << " Index: " << i;
+    EXPECT_EQ(30      ,min)
+        << "Value: " << val << " Index: " << i;
+    EXPECT_EQ(0       ,sec)
+        << "Value: " << val << " Index: " << i;
   }
 }
 
