@@ -5,7 +5,7 @@ include $(HEADER)
 TARGETS := test.reg.vincenty test.reg.coordinategrid
 
 # These apply to all targets in this makerules.
-_LDFLAGS := -pthread
+_LDFLAGS := -pthread -Wl,-rpath=$(TGTDIR)
 _LINK := vincenty gtest_main gtest
 
 test.reg.vincenty_SRCS := test.vincenty.cpp
