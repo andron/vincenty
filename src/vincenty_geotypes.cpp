@@ -58,19 +58,19 @@ double vposition::longitude() const
 //! Integer degrees from float radian.
 int vposition::deg( const double rad )
 {
-  return int( to_deg(rad) );
+  return int( degf(rad) );
 }
 
 //! Extracts integer minutes from float radian.
 int vposition::min( const double rad )
 {
-  return int( ( degf(rad) - deg(rad) ) * 60 );
+  return int( minf(rad) );
 }
 
 //! Extracts integer seconds from float radian.
 int vposition::sec( const double rad )
 {
-  return int( ( minf(rad) - min(rad) ) * 60 + 0.5 );
+  return int( secf(rad) );
 }
 
 
@@ -83,13 +83,14 @@ double vposition::degf( const double rad )
 //! Extracts decimal part minutes from float radian.
 double vposition::minf( const double rad )
 {
-  return ( degf(rad) - deg(rad) ) * 60;
+  float const deg = to_deg(rad);
+  return ( deg - floor(deg) ) * 60.0;
 }
 
 //! Extracts decimal part seconds from float radian.
 double vposition::secf( const double rad )
 {
-  return ( minf(rad) - min(rad) ) * 60;
+  return ( minf(rad) - min(rad) ) * 60.0;
 }
 
 // Operators for vposition.
