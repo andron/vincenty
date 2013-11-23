@@ -8,7 +8,7 @@ RELEASE  := 1
 REQUIRES := # Nothing
 $(call setup)
 
-_CXXFLAGS := -march=native
+CXXFLAGS += -march=native -fsanitize=address
 
 TARGETS := libvincenty.so
 
