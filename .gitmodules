@@ -1,3 +1,4 @@
 [submodule "bob"]
 	path = bob
 	url = https://github.com/andron/bob.git
+	branch = master
