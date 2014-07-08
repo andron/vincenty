@@ -84,12 +84,12 @@ std::ostream& format::rad(std::ostream& os)
 }
 
 
-long format::coordtype()
+long format::coordinate_type()
 {
   return _format["coordinate_format"];
 }
 
-long format::dirtype()
+long format::direction_type()
 {
   return _format["direction_format"];
 }
@@ -114,7 +114,7 @@ std::ostream& operator<<( std::ostream& os, const vdirection& rhs )
   const std::streamsize prec = os.precision();
   os.setf( std::ios::fixed );
   os.fill(' ');
-  if ( os.iword(format::dirtype()) == format::DEG ) {
+  if ( os.iword(format::direction_type()) == format::DEG ) {
     os << "{" 
        << std::setw(prec+5) << rhs.bearing1*180/M_PI << "," 
        << std::setw(prec)   << rhs.distance << "," 
@@ -150,7 +150,7 @@ std::ostream& operator<<( std::ostream& os, const vposition& rhs )
 {
   const std::ios_base::fmtflags fmt = os.flags();
   os.setf( std::ios::fixed );
-  if ( os.iword(format::coordtype()) == format::DMS ) {
+  if ( os.iword(format::coordinate_type()) == format::DMS ) {
     os << "["
        << std::setw(3) << vposition::deg(rhs.coords.a[0]) << "°" 
        << std::setw(3) << vposition::min(rhs.coords.a[0]) << "'" 
@@ -160,7 +160,7 @@ std::ostream& operator<<( std::ostream& os, const vposition& rhs )
        << std::setw(3) << vposition::min(rhs.coords.a[1]) << "'"
        << std::setw(std::cout.precision()+4)
        << vposition::secf(rhs.coords.a[1]) << "\"]";
-  } else if ( os.iword(format::coordtype()) == format::DM ) {
+  } else if ( os.iword(format::coordinate_type()) == format::DM ) {
     os << "["
        << std::setw(3) << vposition::deg(rhs.coords.a[0]) << "°" 
        << std::setw(std::cout.precision()+3)
@@ -168,7 +168,7 @@ std::ostream& operator<<( std::ostream& os, const vposition& rhs )
        << std::setw(3) << vposition::deg(rhs.coords.a[1]) << "°" 
        << std::setw(std::cout.precision()+3)
        << vposition::minf(rhs.coords.a[1]) << "']";
-  } else if ( os.iword(format::coordtype()) == format::DD ) {
+  } else if ( os.iword(format::coordinate_type()) == format::DD ) {
     os << "[" 
        << std::setw(std::cout.precision()+3)
        << vposition::degf(rhs.coords.a[0]) << ","

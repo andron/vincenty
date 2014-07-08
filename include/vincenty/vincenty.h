@@ -139,13 +139,13 @@ class format
    * @brief Returns the current coordinate format value.
    * @return ostream xalloc value.
    */
-  static long coordtype();
+  static long coordinate_type();
 
   /*!
    * @brief Returns the current direction format value.
    * @return ostream xalloc value.
    */
-  static long dirtype();
+  static long direction_type();
 };
 
 
