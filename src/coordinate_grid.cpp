@@ -43,7 +43,7 @@ const double sqrt2 = sqrt(2.0);
 /**
  * Standard 2D interpolation.
  */
-double
+double __attribute__((unused))
 interpolate2d( const double A,
                const double B,
                const double C,
