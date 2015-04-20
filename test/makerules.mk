@@ -8,8 +8,9 @@ TARGETS := test.reg.vincenty test.reg.coordinategrid
 _LDFLAGS := -pthread -Wl,-rpath=$(TGTDIR)
 _LINK := vincenty gtest_main gtest
 
-test.reg.vincenty_SRCS := test.vincenty.cpp
+GTEST_SRCS := gtest-all.cc
 
-test.reg.coordinategrid_SRCS := test.coordinate_grid.cpp
+test.reg.vincenty_SRCS := $(GTEST_SRCS) test.vincenty.cpp
+test.reg.coordinategrid_SRCS := $(GTEST_SRCS) test.coordinate_grid.cpp
 
 include $(FOOTER)
