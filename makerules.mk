@@ -12,4 +12,10 @@ CXXFLAGS += -march=native -fsanitize=address
 
 TARGETS := libvincenty.so
 
+ifdef __bobBUILDSTAGE
+coverage: CXXFLAGS += --coverage
+coverage: check
+	./gcovr -r . --html -o report-gcovr.html
+endif
+
 include $(FOOTER)
